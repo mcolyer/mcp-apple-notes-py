@@ -1,0 +1,51 @@
+{
+  "dxt_version": "1.0.0",
+  "name": "apple-notes-mcp",
+  "version": "0.1.0",
+  "display_name": "Apple Notes MCP",
+  "description": "Access and list notes from Apple Notes.app via MCP",
+  "long_description": "This Desktop Extension provides access to Apple Notes through the Model Context Protocol (MCP). It allows AI assistants to list and retrieve notes from your local Apple Notes.app, enabling seamless integration of your note-taking workflow with AI interactions.",
+  "author": {
+    "name": "User",
+    "email": "user@example.com"
+  },
+  "license": "MIT",
+  "server": {
+    "type": "python",
+    "entry_point": "main.py",
+    "runtime": {
+      "python": ">=3.13.0"
+    }
+  },
+  "tools": [
+    {
+      "name": "list_notes",
+      "description": "List all accessible notes from Apple Notes.app",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of notes to return (default: 50)",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
+      }
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin"],
+    "claude_desktop": ">=0.10.0"
+  },
+  "configuration": [
+    {
+      "key": "debug_mode",
+      "type": "boolean",
+      "title": "Debug Mode",
+      "description": "Enable verbose logging for debugging",
+      "default": false
+    }
+  ]
+}
