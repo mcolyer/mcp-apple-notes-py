@@ -8,3 +8,9 @@ dependencies = [
     "mcp[cli]",
     "macnotesapp"
 ]
+
+[tool.uv]
+dev-dependencies = []
+
+[project.scripts]
+package-dxt = "scripts.package_dxt:main"

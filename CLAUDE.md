@@ -50,6 +50,9 @@ mcp-apple-notes-py/
 ├── pyproject.toml       # Python project configuration
 ├── README.md           # User documentation
 ├── CLAUDE.md           # This file - development guidelines
+├── scripts/            # Build and utility scripts
+│   ├── __init__.py     # Package marker
+│   └── package_dxt.py  # DXT packaging script
 └── .venv/              # Virtual environment (uv managed)
 ```
 
@@ -89,8 +92,15 @@ uv run python main.py
 # Test with debug mode
 DEBUG_MODE=true uv run python main.py
 
-# Package for distribution (when DXT tooling is available)
-# dxt pack .
+# Package as DXT for distribution
+uv run scripts/package_dxt.py
+# OR
+uv run package-dxt
+
+# Install the generated DXT package in Claude Desktop
+# 1. Run packaging command above
+# 2. Open Claude Desktop → Settings → Extensions
+# 3. Click "Install Extension" and select the .dxt file
 ```
 
 ## Error Handling Patterns

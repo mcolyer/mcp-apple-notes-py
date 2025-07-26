@@ -343,6 +343,9 @@ requires-dist = [
     { name = "mcp", extras = ["cli"] },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "mdurl"
 version = "0.1.2"
