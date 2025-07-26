@@ -10,7 +10,9 @@ dependencies = [
 ]
 
 [tool.uv]
-dev-dependencies = []
+dev-dependencies = [
+    "dxt"
+]
 
 [project.scripts]
 package-dxt = "scripts.package_dxt:main"

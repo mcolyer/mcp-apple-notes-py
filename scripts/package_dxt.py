@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 import json
 import sys
+import subprocess
 
 def load_manifest():
     """Load and validate the manifest.json file."""
@@ -28,8 +29,81 @@ def load_manifest():
     
     return manifest
 
+def download_dependencies(lib_dir):
+    """Install Python dependencies to lib directory using UV."""
+    print("📥 Installing Python dependencies to lib/...")
+    
+    # Create lib directory
+    lib_dir.mkdir(exist_ok=True)
+    
+    # Dependencies to install
+    dependencies = ["mcp[cli]", "macnotesapp"]
+    
+    print(f"   Installing dependencies: {', '.join(dependencies)}")
+    try:
+        # Use UV to install packages to target directory
+        result = subprocess.run([
+            "uv", "pip", "install", 
+            "--target", str(lib_dir),
+            *dependencies
+        ], capture_output=True, text=True, check=True)
+        
+        print("   ✅ Installed all dependencies")
+        
+        # List what was installed
+        installed_dirs = [d for d in lib_dir.iterdir() if d.is_dir() and not d.name.startswith('.')]
+        installed_files = [f for f in lib_dir.iterdir() if f.is_file() and f.name.endswith(('.py', '.so'))]
+        
+        print(f"   📦 Installed {len(installed_dirs)} packages and {len(installed_files)} files:")
+        for item in sorted(installed_dirs + installed_files):
+            if item.is_dir():
+                print(f"      📁 {item.name}/")
+            else:
+                print(f"      📄 {item.name}")
+        
+    except subprocess.CalledProcessError as e:
+        print(f"   ❌ Failed to install dependencies: {e}")
+        print(f"   Error output: {e.stderr}")
+        sys.exit(1)
+
+def create_bundled_structure(temp_dir):
+    """Create the bundled DXT structure in a temporary directory."""
+    print("🏗️  Creating bundled structure...")
+    
+    # Create directories
+    server_dir = temp_dir / "server"
+    lib_dir = temp_dir / "lib"
+    server_dir.mkdir()
+    lib_dir.mkdir()
+    
+    # Copy main.py to server/
+    shutil.copy("main.py", server_dir / "main.py")
+    print(f"   ✅ Copied main.py to server/")
+    
+    # Install dependencies to lib/
+    download_dependencies(lib_dir)
+    
+    # Copy other required files to root
+    root_files = [
+        "manifest.json",
+        "requirements.txt",
+        "README.md"
+    ]
+    
+    for file_path in root_files:
+        if Path(file_path).exists():
+            shutil.copy(file_path, temp_dir / file_path)
+            print(f"   ✅ Copied {file_path}")
+    
+    # Copy optional files
+    optional_files = ["CLAUDE.md", "LICENSE", "icon.png"]
+    for file_path in optional_files:
+        if Path(file_path).exists():
+            shutil.copy(file_path, temp_dir / file_path)
+            print(f"   ✅ Copied {file_path}")
+
 def create_dxt_package():
-    """Create a DXT package as a zip file."""
+    """Create a DXT package as a zip file with bundled dependencies."""
     manifest = load_manifest()
     
     # Get package name and version from manifest
@@ -37,46 +111,29 @@ def create_dxt_package():
     version = manifest.get('version', '0.1.0')
     output_filename = f"{package_name}-{version}.dxt"
     
-    # Files to include in the DXT package
-    files_to_include = [
-        "manifest.json",
-        "main.py",
-        "pyproject.toml",
-        "README.md",
-        "uv.lock"
-    ]
+    print(f"📦 Creating bundled DXT package: {output_filename}")
     
-    # Optional files (include if they exist)
-    optional_files = [
-        "CLAUDE.md",
-        "LICENSE",
-        "icon.png"
-    ]
-    
-    print(f"📦 Creating DXT package: {output_filename}")
-    
-    with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as dxt_zip:
-        # Add required files
-        for file_path in files_to_include:
-            if Path(file_path).exists():
-                dxt_zip.write(file_path)
-                print(f"   ✅ Added: {file_path}")
-            else:
-                print(f"   ❌ Missing required file: {file_path}")
-                sys.exit(1)
+    # Create temporary directory for bundled structure
+    with tempfile.TemporaryDirectory() as temp_dir_str:
+        temp_dir = Path(temp_dir_str)
         
-        # Add optional files if they exist
-        for file_path in optional_files:
-            if Path(file_path).exists():
-                dxt_zip.write(file_path)
-                print(f"   ✅ Added: {file_path}")
-            else:
-                print(f"   ⚠️  Optional file not found: {file_path}")
+        # Create the bundled structure
+        create_bundled_structure(temp_dir)
+        
+        # Create the ZIP file
+        with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as dxt_zip:
+            # Add all files from temp directory
+            for file_path in temp_dir.rglob('*'):
+                if file_path.is_file():
+                    # Calculate relative path from temp_dir
+                    relative_path = file_path.relative_to(temp_dir)
+                    dxt_zip.write(file_path, relative_path)
+                    print(f"   ✅ Added: {relative_path}")
     
     # Verify the package was created
     if Path(output_filename).exists():
         file_size = Path(output_filename).stat().st_size
-        print(f"✅ DXT package created successfully!")
+        print(f"✅ Bundled DXT package created successfully!")
         print(f"   File: {output_filename}")
         print(f"   Size: {file_size:,} bytes")
         
@@ -122,9 +179,14 @@ def validate_manifest_schema():
         print("❌ Server entry_point is required")
         sys.exit(1)
     
-    # Check if entry point file exists
+    # Check if entry point file exists (check original main.py for bundled structure)
     entry_point = server.get('entry_point')
-    if not Path(entry_point).exists():
+    if entry_point == "server/main.py":
+        # For bundled structure, check if main.py exists (will be moved to server/ during packaging)
+        if not Path("main.py").exists():
+            print(f"❌ Source file not found: main.py (needed for {entry_point})")
+            sys.exit(1)
+    elif not Path(entry_point).exists():
         print(f"❌ Entry point file not found: {entry_point}")
         sys.exit(1)
     

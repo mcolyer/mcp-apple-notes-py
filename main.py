@@ -3,7 +3,6 @@ import logging
 import sys
 from typing import List, Dict, Any, Optional
 from mcp.server.fastmcp import FastMCP
-from mcp.server import stdio
 import os
 
 # Configure logging
@@ -20,7 +19,7 @@ logger = logging.getLogger("apple-notes-mcp")
 mcp = FastMCP("apple-notes-mcp")
 
 # Check if debug mode is enabled via environment variable
-DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
+DEBUG_MODE = os.getenv("DEBUG", "false").lower() == "true"
 if DEBUG_MODE:
     logging.getLogger().setLevel(logging.DEBUG)
     logger.debug("Debug mode enabled")
@@ -127,14 +126,12 @@ def list_notes(limit: int = 50) -> Dict[str, Any]:
             "message": "Failed to access Apple Notes. Please ensure Notes.app is accessible and you have proper permissions."
         }
 
-async def main():
-    """Main entry point for the MCP server"""
+if __name__ == "__main__":
     logger.info("Starting Apple Notes MCP Server")
     
     try:
-        # Serve the MCP server using stdio transport
-        async with stdio.stdio_server() as (read_stream, write_stream):
-            await mcp.run(read_stream, write_stream)
+        # Use FastMCP's run method which handles the event loop properly
+        mcp.run("stdio")
     except KeyboardInterrupt:
         logger.info("Server interrupted by user")
     except Exception as e:
@@ -142,6 +139,3 @@ async def main():
         import traceback
         logger.error(traceback.format_exc())
         sys.exit(1)
-
-if __name__ == "__main__":
-    asyncio.run(main())

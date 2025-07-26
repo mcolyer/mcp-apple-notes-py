@@ -55,6 +55,10 @@ Icon?
 # DXT packages
 *.dxt
 
+# DXT bundled structure (generated during packaging)
+server/
+lib/
+
 # Logs
 *.log
 logs/

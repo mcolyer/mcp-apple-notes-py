@@ -1,8 +1,8 @@
 {
-  "dxt_version": "1.0.0",
+  "dxt_version": "0.1",
   "name": "apple-notes-mcp",
-  "version": "0.1.0",
   "display_name": "Apple Notes MCP",
+  "version": "0.1.0",
   "description": "Access and list notes from Apple Notes.app via MCP",
   "long_description": "This Desktop Extension provides access to Apple Notes through the Model Context Protocol (MCP). It allows AI assistants to list and retrieve notes from your local Apple Notes.app, enabling seamless integration of your note-taking workflow with AI interactions.",
   "author": {
@@ -12,40 +12,46 @@
   "license": "MIT",
   "server": {
     "type": "python",
-    "entry_point": "main.py",
-    "runtime": {
-      "python": ">=3.13.0"
+    "entry_point": "server/main.py",
+    "mcp_config": {
+      "command": "python3",
+      "args": [
+        "${__dirname}/server/main.py"
+      ],
+      "env": {
+        "DEBUG": "${user_config.debug_mode}",
+        "PYTHONPATH": "${__dirname}/lib"
+      }
     }
   },
   "tools": [
     {
       "name": "list_notes",
-      "description": "List all accessible notes from Apple Notes.app",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "limit": {
-            "type": "integer",
-            "description": "Maximum number of notes to return (default: 50)",
-            "default": 50,
-            "minimum": 1,
-            "maximum": 1000
-          }
-        }
-      }
+      "description": "List all accessible notes from Apple Notes.app"
     }
   ],
-  "compatibility": {
-    "platforms": ["darwin"],
-    "claude_desktop": ">=0.10.0"
-  },
-  "configuration": [
-    {
-      "key": "debug_mode",
+  "keywords": [
+    "notes",
+    "apple",
+    "productivity",
+    "macOS"
+  ],
+  "user_config": {
+    "debug_mode": {
       "type": "boolean",
       "title": "Debug Mode",
       "description": "Enable verbose logging for debugging",
-      "default": false
+      "default": false,
+      "required": false
     }
-  ]
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin"
+    ],
+    "runtimes": {
+      "python": ">=3.13.0"
+    }
+  }
 }
