@@ -12,6 +12,7 @@ This is a Desktop Extension (DXT) that provides access to Apple Notes through th
 - **Use UV**: Always use `uv` for dependency management and virtual environment handling
 - **Sync dependencies**: Run `uv sync` to install/update dependencies
 - **Add dependencies**: Use `uv add <package>` to add new dependencies
+- **IMPORTANT**: When adding new dependencies, also update `scripts/package_dxt.py` to include them in the bundled DXT package dependencies list
 
 ### Code Standards
 - **Python Version**: Requires Python 3.13 or higher
