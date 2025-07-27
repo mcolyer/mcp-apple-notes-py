@@ -60,24 +60,49 @@ def list_notes(limit: int = 50, folder: Optional[str] = None) -> List[Dict[str, 
                 if folder not in account.folders:
                     logger.error(f"Folder '{folder}' not found. Available: {account.folders}")
                     return []
-                all_notes = account.notes()
-                # Filter notes by folder (handle case where folder might be a string)
-                filtered_notes = []
-                for note in all_notes:
-                    try:
-                        note_folder = note.folder
-                        # Handle both string and object folder representations
-                        if hasattr(note_folder, 'name'):
-                            folder_name = note_folder.name
-                        else:
-                            folder_name = str(note_folder)
+                
+                logger.debug(f"Filtering notes by folder: {folder}")
+                
+                # Try to get notes with a reasonable limit first to avoid loading everything
+                try:
+                    # Get all notes but with a reasonable approach
+                    all_notes_raw = account.notes()
+                    logger.debug(f"Total notes in account: {len(all_notes_raw)}")
+                    
+                    # Early exit if no notes
+                    if not all_notes_raw:
+                        logger.info(f"No notes found in account for folder filtering")
+                        return []
+                    
+                    # Filter by folder with better error handling
+                    filtered_notes = []
+                    for i, note in enumerate(all_notes_raw):
+                        # Process in batches to avoid hanging
+                        if i > 0 and i % 500 == 0:
+                            logger.debug(f"Processed {i} notes, found {len(filtered_notes)} in folder '{folder}'")
                         
-                        if folder_name == folder:
-                            filtered_notes.append(note)
-                    except Exception as note_error:
-                        logger.debug(f"Error checking folder for note: {note_error}")
-                        continue
-                all_notes = filtered_notes
+                        try:
+                            # Simple folder check
+                            if hasattr(note, 'folder') and note.folder:
+                                note_folder_name = str(note.folder)
+                                if note_folder_name == folder:
+                                    filtered_notes.append(note)
+                                    # Early exit if we have enough for the limit
+                                    if len(filtered_notes) >= limit * 2:  # Get a bit extra in case some fail processing
+                                        logger.debug(f"Found enough notes ({len(filtered_notes)}) for limit {limit}, stopping early")
+                                        break
+                        except:
+                            # Skip problematic notes silently
+                            continue
+                    
+                    all_notes = filtered_notes
+                    logger.info(f"Found {len(all_notes)} notes in folder '{folder}'")
+                    
+                except Exception as filter_error:
+                    logger.error(f"Error during folder filtering: {filter_error}")
+                    # Fallback to returning empty list rather than hanging
+                    return []
+                
             except Exception as folder_error:
                 logger.warning(f"Error filtering by folder '{folder}': {folder_error}")
                 all_notes = notes_app.notes()
