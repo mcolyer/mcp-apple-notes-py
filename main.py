@@ -227,7 +227,7 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
         limit: Maximum number of results to return (default: 10, max: 100)
     
     Returns:
-        Dictionary containing matching note titles and metadata
+        Dictionary containing matching notes with titles and IDs
     """
     try:
         from macnotesapp import NotesApp
@@ -305,24 +305,9 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
                         break
                 
                 if found_match:
-                    # Handle folder name properly
-                    folder_name = "Unknown"
-                    try:
-                        if hasattr(note.folder, 'name'):
-                            folder_name = note.folder.name
-                        else:
-                            folder_name = str(note.folder)
-                    except:
-                        folder_name = "Unknown"
-                    
                     note_info = {
                         "title": note.name or "Untitled",
-                        "id": note.id,
-                        "body_preview": (note.plaintext or note.body or "")[:200] + ("..." if len(note.plaintext or note.body or "") > 200 else ""),
-                        "creation_date": note.creation_date.isoformat() if note.creation_date else None,
-                        "modification_date": note.modification_date.isoformat() if note.modification_date else None,
-                        "account": note.account.name if note.account else "Unknown",
-                        "folder": folder_name
+                        "id": note.id
                     }
                     matching_notes.append(note_info)
                     
