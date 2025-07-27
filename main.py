@@ -27,13 +27,12 @@ if DEBUG_MODE:
     logger.debug("Debug mode enabled")
 
 @mcp.tool()
-def list_notes(limit: int = 50, folder: Optional[str] = None) -> List[Dict[str, str]]:
+def list_notes(limit: int = 50) -> List[Dict[str, str]]:
     """
     List all accessible notes from Apple Notes.app
     
     Args:
         limit: Maximum number of notes to return (default: 50, max: 1000)
-        folder: Optional folder name to filter notes (case sensitive, if None, lists from all folders)
     
     Returns:
         List of dictionaries with note titles and IDs
@@ -53,61 +52,8 @@ def list_notes(limit: int = 50, folder: Optional[str] = None) -> List[Dict[str, 
         # Initialize Notes app connection
         notes_app = NotesApp()
         
-        # Get notes based on folder filter
-        if folder:
-            try:
-                account = notes_app.account()
-                if folder not in account.folders:
-                    logger.error(f"Folder '{folder}' not found. Available: {account.folders}")
-                    return []
-                
-                logger.debug(f"Filtering notes by folder: {folder}")
-                
-                # Try to get notes with a reasonable limit first to avoid loading everything
-                try:
-                    # Get all notes but with a reasonable approach
-                    all_notes_raw = account.notes()
-                    logger.debug(f"Total notes in account: {len(all_notes_raw)}")
-                    
-                    # Early exit if no notes
-                    if not all_notes_raw:
-                        logger.info(f"No notes found in account for folder filtering")
-                        return []
-                    
-                    # Filter by folder with better error handling
-                    filtered_notes = []
-                    for i, note in enumerate(all_notes_raw):
-                        # Process in batches to avoid hanging
-                        if i > 0 and i % 500 == 0:
-                            logger.debug(f"Processed {i} notes, found {len(filtered_notes)} in folder '{folder}'")
-                        
-                        try:
-                            # Simple folder check
-                            if hasattr(note, 'folder') and note.folder:
-                                note_folder_name = str(note.folder)
-                                if note_folder_name == folder:
-                                    filtered_notes.append(note)
-                                    # Early exit if we have enough for the limit
-                                    if len(filtered_notes) >= limit * 2:  # Get a bit extra in case some fail processing
-                                        logger.debug(f"Found enough notes ({len(filtered_notes)}) for limit {limit}, stopping early")
-                                        break
-                        except:
-                            # Skip problematic notes silently
-                            continue
-                    
-                    all_notes = filtered_notes
-                    logger.info(f"Found {len(all_notes)} notes in folder '{folder}'")
-                    
-                except Exception as filter_error:
-                    logger.error(f"Error during folder filtering: {filter_error}")
-                    # Fallback to returning empty list rather than hanging
-                    return []
-                
-            except Exception as folder_error:
-                logger.warning(f"Error filtering by folder '{folder}': {folder_error}")
-                all_notes = notes_app.notes()
-        else:
-            all_notes = notes_app.notes()
+        # Get all notes
+        all_notes = notes_app.notes()
         
         if not all_notes:
             logger.info("No notes found in Apple Notes")
@@ -242,13 +188,12 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
+def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
     """
     Search notes by text content or tags
     
     Args:
         query: Search term or tag (use #tag format for tag search)
-        folder: Optional folder name to limit search to specific folder (case sensitive)
         limit: Maximum number of results to return (default: 10, max: 100)
     
     Returns:
@@ -272,7 +217,7 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
         elif limit > 100:
             limit = 100
             
-        logger.info(f"Searching notes for: '{query}' (limit: {limit}, folder: {folder})")
+        logger.info(f"Searching notes for: '{query}' (limit: {limit})")
         
         notes_app = NotesApp()
         
@@ -288,28 +233,8 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
             # For content search, split query into words for better matching
             search_terms = [query.strip()]
         
-        # Get notes based on folder filter
-        if folder:
-            try:
-                account = notes_app.account()
-                if folder not in account.folders:
-                    return {
-                        "notes": [],
-                        "found_count": 0,
-                        "query": query,
-                        "search_type": search_type,
-                        "error": f"Folder '{folder}' not found",
-                        "available_folders": account.folders,
-                        "message": f"Folder '{folder}' does not exist"
-                    }
-                all_notes = account.notes()
-                # Filter notes by folder
-                filtered_notes = [note for note in all_notes if note.folder.name == folder]
-            except Exception as folder_error:
-                logger.warning(f"Error filtering by folder '{folder}': {folder_error}")
-                filtered_notes = notes_app.notes()
-        else:
-            filtered_notes = notes_app.notes()
+        # Get all notes for searching
+        filtered_notes = notes_app.notes()
         
         # Perform search
         matching_notes = []
@@ -349,8 +274,7 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
             "found_count": len(matching_notes),
             "query": query,
             "search_type": search_type,
-            "folder": folder,
-            "message": f"Found {len(matching_notes)} notes matching '{query}'" + (f" in folder '{folder}'" if folder else "")
+            "message": f"Found {len(matching_notes)} notes matching '{query}'"
         }
         
         logger.info(f"Search completed: {len(matching_notes)} results for '{query}'")
@@ -381,14 +305,13 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
         }
 
 @mcp.tool()
-def create_note(title: str, body: str, folder: Optional[str] = None) -> Dict[str, Any]:
+def create_note(title: str, body: str) -> Dict[str, Any]:
     """
     Create a new note with Markdown formatted body
     
     Args:
         title: Title for the new note
         body: Body content in Markdown format
-        folder: Optional folder name to create note in (case sensitive, uses default folder if not specified)
     
     Returns:
         Dictionary containing created note details and status
@@ -403,19 +326,12 @@ def create_note(title: str, body: str, folder: Optional[str] = None) -> Dict[str
                 "message": "Please provide a valid note title"
             }
         
-        logger.info(f"Creating note: '{title}' in folder: {folder or 'default'}")
+        logger.info(f"Creating note: '{title}' in default folder")
         
         notes_app = NotesApp()
         account = notes_app.account()
         
-        # Validate folder if specified
-        if folder and folder not in account.folders:
-            return {
-                "success": False,
-                "error": f"Folder '{folder}' not found",
-                "available_folders": account.folders,
-                "message": f"Folder '{folder}' does not exist"
-            }
+        # Create note in default folder
         
         # Convert Markdown to HTML for Apple Notes
         try:
@@ -427,21 +343,12 @@ def create_note(title: str, body: str, folder: Optional[str] = None) -> Dict[str
             # Fallback to plain text with basic HTML formatting
             html_body = body.replace('\\n', '<br>')
         
-        # Create the note
+        # Create the note in default folder
         try:
-            if folder:
-                # Create note in specific folder
-                new_note = account.make_note(
-                    name=title.strip(),
-                    body=html_body,
-                    folder=folder
-                )
-            else:
-                # Create note in default folder
-                new_note = account.make_note(
-                    name=title.strip(),
-                    body=html_body
-                )
+            new_note = account.make_note(
+                name=title.strip(),
+                body=html_body
+            )
             
             # Return note details
             result = {
@@ -454,7 +361,7 @@ def create_note(title: str, body: str, folder: Optional[str] = None) -> Dict[str
                     "account": new_note.account.name if new_note.account else "Unknown",
                     "folder": new_note.folder.name if new_note.folder else "Unknown"
                 },
-                "message": f"Successfully created note '{title}'" + (f" in folder '{folder}'" if folder else "")
+                "message": f"Successfully created note '{title}' in default folder"
             }
             
             logger.info(f"Successfully created note: {title}")
