@@ -27,7 +27,19 @@
   "tools": [
     {
       "name": "list_notes",
-      "description": "List all accessible notes from Apple Notes.app"
+      "description": "List note titles and IDs from Apple Notes.app with optional folder filtering"
+    },
+    {
+      "name": "get_notes",
+      "description": "Retrieve specific notes by their IDs"
+    },
+    {
+      "name": "search_notes",
+      "description": "Search notes by text content or tags with optional folder filtering"
+    },
+    {
+      "name": "create_note",
+      "description": "Create a new note with Markdown formatted body"
     }
   ],
   "keywords": [
