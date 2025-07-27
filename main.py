@@ -33,7 +33,7 @@ def list_notes(limit: int = 50, folder: Optional[str] = None) -> List[Dict[str, 
     
     Args:
         limit: Maximum number of notes to return (default: 50, max: 1000)
-        folder: Optional folder name to filter notes (if None, lists from all folders)
+        folder: Optional folder name to filter notes (case sensitive, if None, lists from all folders)
     
     Returns:
         List of dictionaries with note titles and IDs
@@ -223,7 +223,7 @@ def search_notes(query: str, folder: Optional[str] = None, limit: int = 10) -> D
     
     Args:
         query: Search term or tag (use #tag format for tag search)
-        folder: Optional folder name to limit search to specific folder
+        folder: Optional folder name to limit search to specific folder (case sensitive)
         limit: Maximum number of results to return (default: 10, max: 100)
     
     Returns:
@@ -363,7 +363,7 @@ def create_note(title: str, body: str, folder: Optional[str] = None) -> Dict[str
     Args:
         title: Title for the new note
         body: Body content in Markdown format
-        folder: Optional folder name to create note in (uses default folder if not specified)
+        folder: Optional folder name to create note in (case sensitive, uses default folder if not specified)
     
     Returns:
         Dictionary containing created note details and status

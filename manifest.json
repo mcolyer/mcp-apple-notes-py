@@ -27,7 +27,7 @@
   "tools": [
     {
       "name": "list_notes",
-      "description": "List note titles and IDs from Apple Notes.app with optional folder filtering"
+      "description": "List note titles and IDs from Apple Notes.app with optional folder filtering (folder names are case sensitive)"
     },
     {
       "name": "get_notes",
@@ -35,11 +35,11 @@
     },
     {
       "name": "search_notes",
-      "description": "Search notes by text content or tags with optional folder filtering"
+      "description": "Search notes by text content or tags with optional folder filtering (folder names are case sensitive)"
     },
     {
       "name": "create_note",
-      "description": "Create a new note with Markdown formatted body"
+      "description": "Create a new note with Markdown formatted body (folder names are case sensitive)"
     }
   ],
   "keywords": [
