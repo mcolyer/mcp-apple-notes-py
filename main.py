@@ -115,10 +115,17 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         
         notes_app = NotesApp()
         
-        # Use built-in ID filtering for better performance
-        filtered_notes = notes_app.notes(id=ids)
-        logger.debug(f"Built-in ID filter found {len(filtered_notes)} notes")
-        # Create a mapping of note IDs to note objects
+        # Use built-in ID filtering with NotesList for better performance
+        noteslist_obj = notes_app.noteslist(id=ids)
+        logger.debug(f"Built-in ID filter executed")
+        # Convert NotesList to list and create mapping
+        try:
+            filtered_notes = list(noteslist_obj)
+        except Exception as list_error:
+            logger.warning(f"Error converting NotesList to list: {list_error}")
+            # Fallback: get all notes and filter manually
+            all_notes = notes_app.notes()
+            filtered_notes = [note for note in all_notes if hasattr(note, 'id') and note.id in ids]
         notes_by_id = {note.id: note for note in filtered_notes if hasattr(note, 'id') and note.id}
         
         found_notes = []
@@ -242,56 +249,39 @@ def search_notes(query: str, limit: int = 10, search_type: str = "body") -> Dict
         is_tag_search = query.strip().startswith('#')
         search_terms = [query.strip()]
         
-        # Use built-in search functionality for much better performance
+        # Use noteslist with proper parameter handling (pass as list)
+        search_query = query.strip()
+        
         try:
-            # Use the appropriate search parameter based on search_type
             if search_type == "name":
-                matching_note_objects = notes_app.notes(name=search_terms)
-                logger.debug(f"Built-in name search found {len(matching_note_objects)} notes")
-            else:  # search_type == "body"
-                matching_note_objects = notes_app.notes(body=search_terms)
-                logger.debug(f"Built-in body search found {len(matching_note_objects)} notes")
+                noteslist_obj = notes_app.noteslist(name=[search_query])
+                logger.debug(f"Built-in name search executed for: {search_query}")
+            else:  # search_type == "body"  
+                noteslist_obj = notes_app.noteslist(body=[search_query])
+                logger.debug(f"Built-in body search executed for: {search_query}")
             
-            # Convert to our format and apply limit
+            logger.debug(f"Found {len(noteslist_obj)} notes matching search")
+            
+            # Get note names and IDs from noteslist
+            note_names = noteslist_obj.name
+            note_ids = noteslist_obj.id
+            
+            # Create matching notes list with limit
             matching_notes = []
-            for note in matching_note_objects[:limit]:
-                try:
-                    note_info = {
-                        "title": note.name or "Untitled",
-                        "id": getattr(note, 'id', 'unknown')
-                    }
-                    matching_notes.append(note_info)
-                except Exception as note_error:
-                    logger.debug(f"Error processing search result: {note_error}")
-                    continue
-            
-            logger.info(f"Search completed: found {len(matching_notes)} matches using built-in {search_type} search")
-            
-        except Exception as search_error:
-            logger.warning(f"Built-in search failed: {search_error}, falling back to manual search")
-            
-            # Fallback to title-only search if built-in search fails
-            all_notes = notes_app.notes()
-            matching_notes = []
-            
-            for note in all_notes:
-                if len(matching_notes) >= limit:
+            for i, (name, note_id) in enumerate(zip(note_names, note_ids)):
+                if i >= limit:
                     break
+                matching_notes.append({
+                    "title": name or "Untitled",
+                    "id": note_id or "unknown"
+                })
                     
-                try:
-                    note_title = (note.name or "").lower()
-                    for term in search_terms:
-                        if term.lower() in note_title:
-                            note_info = {
-                                "title": note.name or "Untitled",
-                                "id": getattr(note, 'id', 'unknown')
-                            }
-                            matching_notes.append(note_info)
-                            break
-                except Exception:
-                    continue
-            
-            logger.info(f"Fallback search completed: found {len(matching_notes)} matches in titles")
+        except Exception as search_error:
+            logger.error(f"Error with noteslist search: {search_error}")
+            # Fallback to empty results
+            matching_notes = []
+        
+        logger.info(f"Search completed: found {len(matching_notes)} matches using built-in {search_type} search")
         
         result = {
             "notes": matching_notes,
