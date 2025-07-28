@@ -115,56 +115,73 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         
         notes_app = NotesApp()
         
-        # Use built-in ID filtering with NotesList for better performance
+        # Use noteslist with ID filtering for better performance
         noteslist_obj = notes_app.noteslist(id=ids)
-        logger.debug(f"Built-in ID filter executed")
-        # Convert NotesList to list and create mapping
-        try:
-            filtered_notes = list(noteslist_obj)
-        except Exception as list_error:
-            logger.warning(f"Error converting NotesList to list: {list_error}")
-            # Fallback: get all notes and filter manually
-            all_notes = notes_app.notes()
-            filtered_notes = [note for note in all_notes if hasattr(note, 'id') and note.id in ids]
-        notes_by_id = {note.id: note for note in filtered_notes if hasattr(note, 'id') and note.id}
+        logger.debug(f"Built-in ID filter executed, found {len(noteslist_obj)} notes")
+        
+        # Extract available attributes from the noteslist
+        note_names = getattr(noteslist_obj, 'name', [])
+        note_ids = getattr(noteslist_obj, 'id', [])
+        note_bodies = getattr(noteslist_obj, 'body', [])
+        note_plaintexts = getattr(noteslist_obj, 'plaintext', [])
+        note_creation_dates = getattr(noteslist_obj, 'creation_date', [])
+        note_modification_dates = getattr(noteslist_obj, 'modification_date', [])
+        note_accounts = getattr(noteslist_obj, 'account', [])
+        note_folders = getattr(noteslist_obj, 'folder', [])
+        note_password_protected = getattr(noteslist_obj, 'password_protected', [])
+        
+        # Create mapping of IDs to note data
+        notes_by_id = {}
+        for i, note_id in enumerate(note_ids):
+            notes_by_id[note_id] = {
+                'name': note_names[i] if i < len(note_names) else None,
+                'id': note_id,
+                'body': note_bodies[i] if i < len(note_bodies) else None,
+                'plaintext': note_plaintexts[i] if i < len(note_plaintexts) else None,
+                'creation_date': note_creation_dates[i] if i < len(note_creation_dates) else None,
+                'modification_date': note_modification_dates[i] if i < len(note_modification_dates) else None,
+                'account': note_accounts[i] if i < len(note_accounts) else None,
+                'folder': note_folders[i] if i < len(note_folders) else None,
+                'password_protected': note_password_protected[i] if i < len(note_password_protected) else False
+            }
         
         found_notes = []
         not_found = []
         
         for note_id in ids:
             if note_id in notes_by_id:
-                note = notes_by_id[note_id]
+                note_data = notes_by_id[note_id]
                 try:
                     # Handle folder name properly
                     folder_name = "Unknown"
                     try:
-                        if hasattr(note.folder, 'name'):
-                            folder_name = note.folder.name
+                        if hasattr(note_data['folder'], 'name'):
+                            folder_name = note_data['folder'].name
                         else:
-                            folder_name = str(note.folder)
+                            folder_name = str(note_data['folder']) if note_data['folder'] else "Unknown"
                     except:
                         folder_name = "Unknown"
                     
                     # Handle account name properly
                     account_name = "Unknown"
                     try:
-                        if hasattr(note.account, 'name'):
-                            account_name = note.account.name
+                        if hasattr(note_data['account'], 'name'):
+                            account_name = note_data['account'].name
                         else:
-                            account_name = str(note.account)
+                            account_name = str(note_data['account']) if note_data['account'] else "Unknown"
                     except:
                         account_name = "Unknown"
                     
                     note_info = {
-                        "name": note.name or "Untitled",
-                        "body": note.body or "",
-                        "plaintext": note.plaintext or "",
-                        "creation_date": note.creation_date.isoformat() if note.creation_date else None,
-                        "modification_date": note.modification_date.isoformat() if note.modification_date else None,
+                        "name": note_data['name'] or "Untitled",
+                        "body": note_data['body'] or "",
+                        "plaintext": note_data['plaintext'] or "",
+                        "creation_date": note_data['creation_date'].isoformat() if note_data['creation_date'] else None,
+                        "modification_date": note_data['modification_date'].isoformat() if note_data['modification_date'] else None,
                         "account": account_name,
                         "folder": folder_name,
-                        "id": note.id,
-                        "password_protected": getattr(note, 'password_protected', False)
+                        "id": note_data['id'],
+                        "password_protected": note_data['password_protected']
                     }
                     found_notes.append(note_info)
                     logger.debug(f"Retrieved note with ID: {note_id}")
