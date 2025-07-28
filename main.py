@@ -114,10 +114,12 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         logger.info(f"Retrieving {len(ids)} notes by ID")
         
         notes_app = NotesApp()
-        all_notes = notes_app.notes()
         
+        # Use built-in ID filtering for better performance
+        filtered_notes = notes_app.notes(id=ids)
+        logger.debug(f"Built-in ID filter found {len(filtered_notes)} notes")
         # Create a mapping of note IDs to note objects
-        notes_by_id = {note.id: note for note in all_notes if hasattr(note, 'id') and note.id}
+        notes_by_id = {note.id: note for note in filtered_notes if hasattr(note, 'id') and note.id}
         
         found_notes = []
         not_found = []
@@ -136,16 +138,26 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
                     except:
                         folder_name = "Unknown"
                     
+                    # Handle account name properly
+                    account_name = "Unknown"
+                    try:
+                        if hasattr(note.account, 'name'):
+                            account_name = note.account.name
+                        else:
+                            account_name = str(note.account)
+                    except:
+                        account_name = "Unknown"
+                    
                     note_info = {
                         "name": note.name or "Untitled",
                         "body": note.body or "",
                         "plaintext": note.plaintext or "",
                         "creation_date": note.creation_date.isoformat() if note.creation_date else None,
                         "modification_date": note.modification_date.isoformat() if note.modification_date else None,
-                        "account": note.account.name if note.account else "Unknown",
+                        "account": account_name,
                         "folder": folder_name,
                         "id": note.id,
-                        "password_protected": note.password_protected
+                        "password_protected": getattr(note, 'password_protected', False)
                     }
                     found_notes.append(note_info)
                     logger.debug(f"Retrieved note with ID: {note_id}")
@@ -188,13 +200,14 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
+def search_notes(query: str, limit: int = 10, search_type: str = "text") -> Dict[str, Any]:
     """
-    Search notes by text content or tags
+    Search notes by text content or in note titles
     
     Args:
         query: Search term or tag (use #tag format for tag search)
         limit: Maximum number of results to return (default: 10, max: 100)
+        search_type: Where to search - "text" for note content, "name" for note titles (default: "text")
     
     Returns:
         Dictionary containing matching notes with titles and IDs
@@ -217,27 +230,27 @@ def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
         elif limit > 100:
             limit = 100
             
-        logger.info(f"Searching notes for: '{query}' (limit: {limit})")
+        # Validate search_type parameter
+        if search_type not in ["text", "name"]:
+            search_type = "text"
+            
+        logger.info(f"Searching notes for: '{query}' in {search_type} (limit: {limit})")
         
         notes_app = NotesApp()
         
-        # Determine search type and prepare search terms
+        # Determine search approach and prepare search terms
         is_tag_search = query.strip().startswith('#')
-        search_type = "tag" if is_tag_search else "content"
-        
-        if is_tag_search:
-            # For tag search, look for the hashtag in the text
-            tag = query.strip()
-            search_terms = [tag]
-        else:
-            # For content search, split query into words for better matching
-            search_terms = [query.strip()]
+        search_terms = [query.strip()]
         
         # Use built-in search functionality for much better performance
         try:
-            # Use the library's built-in text search
-            matching_note_objects = notes_app.notes(text=search_terms)
-            logger.debug(f"Built-in search found {len(matching_note_objects)} notes")
+            # Use the appropriate search parameter based on search_type
+            if search_type == "name":
+                matching_note_objects = notes_app.notes(name=search_terms)
+                logger.debug(f"Built-in name search found {len(matching_note_objects)} notes")
+            else:  # search_type == "text"
+                matching_note_objects = notes_app.notes(text=search_terms)
+                logger.debug(f"Built-in text search found {len(matching_note_objects)} notes")
             
             # Convert to our format and apply limit
             matching_notes = []
@@ -252,7 +265,7 @@ def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
                     logger.debug(f"Error processing search result: {note_error}")
                     continue
             
-            logger.info(f"Search completed: found {len(matching_notes)} matches using built-in search")
+            logger.info(f"Search completed: found {len(matching_notes)} matches using built-in {search_type} search")
             
         except Exception as search_error:
             logger.warning(f"Built-in search failed: {search_error}, falling back to manual search")
@@ -285,7 +298,7 @@ def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
             "found_count": len(matching_notes),
             "query": query,
             "search_type": search_type,
-            "message": f"Found {len(matching_notes)} notes matching '{query}'"
+            "message": f"Found {len(matching_notes)} notes matching '{query}' in {search_type}"
         }
         
         logger.info(f"Search completed: {len(matching_notes)} results for '{query}'")

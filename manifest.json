@@ -35,7 +35,7 @@
     },
     {
       "name": "search_notes",
-      "description": "Search notes by text content or tags"
+      "description": "Search notes by text content or in note titles with configurable search type"
     },
     {
       "name": "create_note",
