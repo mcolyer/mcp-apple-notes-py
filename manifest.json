@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "apple-notes-mcp",
   "display_name": "Apple Notes MCP",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Access and list notes from Apple Notes.app via MCP",
   "long_description": "This Desktop Extension provides access to Apple Notes through the Model Context Protocol (MCP). It allows AI assistants to list and retrieve notes from your local Apple Notes.app, enabling seamless integration of your note-taking workflow with AI interactions.",
   "author": {

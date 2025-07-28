@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Future changes will be documented here
 
+## [0.2.1] - 2025-07-28
+
+### Fixed
+- Fixed heredoc syntax error in GitHub Actions release workflow that prevented automated releases
+- Resolved YAML parsing issues with nested quotes and EOF markers in release notes
+- Updated release workflow to use separate file creation step for better reliability
+
 ## [0.2.0] - 2025-07-28
 
 ### Added
@@ -95,6 +102,7 @@ This project uses automated releases via GitHub Actions:
 5. **Distribution**: DXT file available for download and installation
 
 ### Version Tags
+- `v0.2.1` - Fixed GitHub Actions release workflow syntax errors
 - `v0.2.0` - Enhanced CI/CD workflows and improved documentation
 - `v0.1.0` - Initial release with core functionality
 
