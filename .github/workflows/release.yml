@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Run tests
+      run: |
+        uv run pytest tests/ -v --tb=short
+        
+    - name: Check import and basic functionality
+      run: |
+        uv run python -c "from main import list_notes, search_notes, get_notes, create_note; print('All imports successful')"
+
+  build-dxt:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+    - name: Update version in manifest.json
+      run: |
+        python -c "
+        import json
+        with open('manifest.json', 'r') as f:
+            manifest = json.load(f)
+        manifest['version'] = '${{ steps.version.outputs.version }}'
+        with open('manifest.json', 'w') as f:
+            json.dump(manifest, f, indent=2)
+        "
+        
+    - name: Build DXT package
+      run: |
+        uv run python scripts/package_dxt.py
+        
+    - name: Get DXT filename
+      id: dxt_file
+      run: |
+        DXT_FILE=$(ls *.dxt | head -n 1)
+        echo "filename=$DXT_FILE" >> $GITHUB_OUTPUT
+        echo "Found DXT file: $DXT_FILE"
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        release_name: Apple Notes MCP v${{ steps.version.outputs.version }}
+        body: |
+          # Apple Notes MCP Desktop Extension v${{ steps.version.outputs.version }}
+          
+          ## Installation
+          
+          1. Download the `.dxt` file from the assets below
+          2. Open Claude Desktop
+          3. Go to Settings → Extensions
+          4. Click "Install Extension" and select the downloaded `.dxt` file
+          5. Restart Claude Desktop to activate the extension
+          
+          ## Features
+          
+          - **List Notes**: Retrieve note titles and IDs from Apple Notes.app
+          - **Get Notes**: Retrieve full note content by ID for efficient access
+          - **Search Notes**: Search notes by text content or tags with hashtag support
+          - **Create Notes**: Create new notes with Markdown formatting support
+          
+          ## Requirements
+          
+          - macOS (Apple Notes.app required)
+          - Python 3.13 or higher
+          - Apple Notes.app access permissions
+          
+          ## What's New
+          
+          See the commit history for detailed changes in this release.
+          
+          ---
+          
+          **Note**: This extension requires macOS permissions to access Apple Notes.app. 
+          Grant permissions when prompted for the extension to function properly.
+        draft: false
+        prerelease: false
+        
+    - name: Upload DXT Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ steps.dxt_file.outputs.filename }}
+        asset_name: ${{ steps.dxt_file.outputs.filename }}
+        asset_content_type: application/zip
+        
+    - name: Upload DXT as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: apple-notes-mcp-dxt
+        path: ./${{ steps.dxt_file.outputs.filename }}
+        retention-days: 90

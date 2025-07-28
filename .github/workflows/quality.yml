@@ -1,0 +1,75 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+        
+    - name: Install UV
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Check Python syntax
+      run: |
+        uv run python -m py_compile main.py
+        uv run python -m py_compile scripts/package_dxt.py
+        find tests/ -name "*.py" -exec uv run python -m py_compile {} \;
+        
+    - name: Validate manifest.json
+      run: |
+        uv run python -c "
+        import json
+        with open('manifest.json') as f:
+            manifest = json.load(f)
+        
+        required_fields = ['dxt_version', 'name', 'version', 'description', 'server']
+        for field in required_fields:
+            assert field in manifest, f'Missing required field: {field}'
+            
+        assert manifest['server']['type'] == 'python', 'Server type must be python'
+        assert 'entry_point' in manifest['server'], 'Server entry_point is required'
+        
+        print('✅ manifest.json validation passed')
+        "
+        
+    - name: Check for common issues
+      run: |
+        # Check for TODO/FIXME comments that might need attention
+        echo "Checking for TODO/FIXME comments..."
+        if grep -r "TODO\|FIXME" --include="*.py" . || true; then
+          echo "Found TODO/FIXME comments - review if needed"
+        fi
+        
+        # Check for debug prints that might have been left in
+        echo "Checking for debug prints..."
+        if grep -r "print(" --include="*.py" main.py scripts/ || true; then
+          echo "⚠️  Found print() statements - consider using logging instead"
+        fi
+        
+        # Check that noteslist() is used instead of notes()
+        echo "Checking for deprecated notes() usage..."
+        if grep -r "\.notes()" --include="*.py" main.py; then
+          echo "❌ Found deprecated notes() usage - should use noteslist()"
+          exit 1
+        else
+          echo "✅ No deprecated notes() usage found"
+        fi

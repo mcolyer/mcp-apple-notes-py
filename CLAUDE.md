@@ -115,6 +115,12 @@ mcp-apple-notes-py/
 ├── pytest.ini          # Pytest configuration
 ├── README.md           # User documentation
 ├── CLAUDE.md           # This file - development guidelines
+├── .github/            # GitHub Actions workflows
+│   └── workflows/      # CI/CD automation
+│       ├── README.md   # Workflow documentation
+│       ├── test.yml    # Test workflow (runs on push/PR)
+│       ├── quality.yml # Code quality checks
+│       └── release.yml # Automated DXT building and releases
 ├── scripts/            # Build and utility scripts
 │   ├── __init__.py     # Package marker
 │   └── package_dxt.py  # DXT packaging script
@@ -244,10 +250,48 @@ uv run pytest tests/ --cov=main --cov-report=html
 - Handle timeout scenarios gracefully
 - Follow principle of least privilege for Apple Notes access
 
+## CI/CD with GitHub Actions
+
+The project includes automated workflows for testing, quality checks, and releases:
+
+### Automated Testing
+- **Test Workflow** runs on every push/PR to main/develop branches
+- Executes all 44 tests using pytest on Ubuntu Linux
+- Validates basic import functionality and code compilation
+- Must pass before any code can be merged
+
+### Code Quality Checks  
+- **Quality Workflow** runs syntax validation and manifest checks
+- Ensures no deprecated `notes()` method usage (enforces `noteslist()`)
+- Scans for potential issues like debug prints and TODO comments
+- Validates manifest.json structure for DXT compliance
+
+### Automated Releases
+- **Release Workflow** triggers on version tags (e.g., `v1.0.0`)
+- Runs full test suite before building
+- Automatically updates manifest.json version from git tag
+- Builds DXT package using `scripts/package_dxt.py`
+- Creates GitHub release with DXT file attached
+- Stores DXT as workflow artifact for download
+
+### Creating Releases
+```bash
+# Create and push a version tag to trigger automated release
+git tag v1.0.0
+git push origin v1.0.0
+
+# GitHub Actions will automatically:
+# 1. Run tests
+# 2. Build DXT package  
+# 3. Create GitHub release
+# 4. Upload DXT file for distribution
+```
+
 ## Deployment Notes
 
 - Package as DXT with all dependencies bundled
-- Test on clean macOS systems
+- Automated DXT building via GitHub Actions on tagged releases
+- Test on clean macOS systems for end-user validation
 - Verify Apple Notes.app permissions workflow
 - Include clear setup instructions for end users
 - Test with different Apple Notes.app configurations (iCloud, local, multiple accounts)
