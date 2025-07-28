@@ -28,6 +28,16 @@ jobs:
       run: |
         uv sync
         
+    - name: Run ruff linting
+      run: |
+        echo "Running ruff linter..."
+        uv run ruff check .
+        
+    - name: Run ruff formatting check
+      run: |
+        echo "Checking code formatting with ruff..."
+        uv run ruff format --check .
+        
     - name: Check Python syntax
       run: |
         uv run python -m py_compile main.py

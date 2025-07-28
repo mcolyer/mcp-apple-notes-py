@@ -155,6 +155,7 @@ mcp-apple-notes-py/
 **Development Dependencies:**
 - `pytest`: Testing framework for comprehensive test suite
 - `pytest-mock`: Mock objects and patching for tests
+- `ruff`: Fast Python linter and formatter for code quality
 
 ## Apple Notes Integration
 
@@ -236,6 +237,11 @@ uv run package-dxt
 
 # Run tests
 uv run pytest tests/ -v
+
+# Run linting and formatting
+uv run ruff check .      # Check for lint issues
+uv run ruff format .     # Format code
+uv run ruff check --fix .  # Auto-fix lint issues
 
 # Run specific test file
 uv run pytest tests/test_list_notes.py -v

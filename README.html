@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Notes MCP Desktop Extension</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #24292f;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { border-bottom: 1px solid #d0d7de; padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid #d0d7de; padding-bottom: 10px; }
+        code {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            font-size: 85%;
+            margin: 0;
+            padding: 0.2em 0.4em;
+        }
+        pre {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            font-size: 85%;
+            line-height: 1.45;
+            overflow: auto;
+            padding: 16px;
+        }
+        pre code {
+            background-color: transparent;
+            border: 0;
+            display: inline;
+            line-height: inherit;
+            margin: 0;
+            max-width: auto;
+            padding: 0;
+            word-wrap: normal;
+        }
+        blockquote {
+            border-left: 0.25em solid #d0d7de;
+            color: #656d76;
+            padding: 0 1em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #d0d7de;
+            padding: 6px 13px;
+            text-align: left;
+        }
+        th {
+            background-color: #f6f8fa;
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .highlight {
+            background-color: #f6f8fa;
+        }
+    </style>
+</head>
+<body>
+<h1 id="apple-notes-mcp-desktop-extension">Apple Notes MCP Desktop Extension</h1>
+<p><a href="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml"><img alt="Test" src="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg" /></a> <a href="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml"><img alt="Code Quality" src="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg" /></a> <a href="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml"><img alt="Release" src="https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml/badge.svg" /></a></p>
+<p>A Desktop Extension (DXT) that provides access to Apple Notes through the Model Context Protocol (MCP). This extension allows AI assistants to list and retrieve notes from your local Apple Notes.app.</p>
+<h2 id="quick-start">🚀 Quick Start</h2>
+<ol>
+<li><strong><a href="https://github.com/mcolyer/mcp-apple-notes-py/releases/latest">Download the latest .dxt file</a></strong></li>
+<li><strong>Open Claude Desktop</strong> → <strong>Settings</strong> → <strong>Extensions</strong></li>
+<li><strong>Click "Install Extension"</strong> and select the downloaded <code>.dxt</code> file</li>
+<li><strong>Restart Claude Desktop</strong> and grant Apple Notes permissions when prompted</li>
+</ol>
+<p>✅ <strong>Ready to use!</strong> Claude can now access your Apple Notes.</p>
+<h2 id="features">Features</h2>
+<ul>
+<li><strong>List Notes</strong>: Retrieve note titles and IDs from Apple Notes.app with optional folder filtering</li>
+<li><strong>Get Notes</strong>: Retrieve full note content by ID for efficient access</li>
+<li><strong>Search Notes</strong>: Search notes by text content or tags with optional folder filtering</li>
+<li><strong>Create Notes</strong>: Create new notes with Markdown formatting support</li>
+<li><strong>Folder Support</strong>: Filter operations by specific Apple Notes folders</li>
+<li><strong>Tag Search</strong>: Search for notes containing specific hashtags (e.g., #work, #personal)</li>
+<li><strong>Error Handling</strong>: Comprehensive error handling with clear messages</li>
+<li><strong>Debug Mode</strong>: Optional verbose logging for troubleshooting</li>
+<li><strong>macOS Integration</strong>: Native integration with Apple Notes.app</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><strong>macOS</strong>: This extension only works on macOS as it requires Apple Notes.app</li>
+<li><strong>Python</strong>: 3.13 or higher</li>
+<li><strong>Permissions</strong>: Apple Notes.app access permissions may be required</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<h3 id="option-1-dxt-package-recommended">Option 1: DXT Package (Recommended)</h3>
+<p>The easiest way to install this extension is using the pre-built DXT package:</p>
+<ol>
+<li><strong>Download the latest DXT file</strong>:</li>
+<li>Go to the <a href="https://github.com/mcolyer/mcp-apple-notes-py/releases/latest">latest release</a></li>
+<li>
+<p>Download the <code>.dxt</code> file from the release assets</p>
+</li>
+<li>
+<p><strong>Install in Claude Desktop</strong>:</p>
+</li>
+<li>Open Claude Desktop</li>
+<li>Go to <strong>Settings</strong> → <strong>Extensions</strong></li>
+<li>Click <strong>"Install Extension"</strong></li>
+<li>Select the downloaded <code>.dxt</code> file</li>
+<li>
+<p>Click <strong>"Install"</strong></p>
+</li>
+<li>
+<p><strong>Restart Claude Desktop</strong> to activate the extension</p>
+</li>
+<li>
+<p><strong>Grant Permissions</strong> (when prompted):</p>
+</li>
+<li>macOS may request permission to access Apple Notes.app</li>
+<li>Click <strong>"Allow"</strong> to enable the extension functionality</li>
+</ol>
+<h3 id="option-2-manual-installation-development">Option 2: Manual Installation (Development)</h3>
+<p>For development or if you want to build from source:</p>
+<ol>
+<li>
+<p><strong>Clone this repository</strong>:<br />
+<code>bash
+   git clone https://github.com/mcolyer/mcp-apple-notes-py.git
+   cd mcp-apple-notes-py</code></p>
+</li>
+<li>
+<p><strong>Install dependencies</strong>:<br />
+<code>bash
+   uv sync</code></p>
+</li>
+<li>
+<p><strong>Run the server</strong>:<br />
+<code>bash
+   uv run python main.py</code></p>
+</li>
+<li>
+<p><strong>Build DXT package</strong> (optional):<br />
+<code>bash
+   uv run python scripts/package_dxt.py</code></p>
+</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<h3 id="available-tools">Available Tools</h3>
+<h4 id="list_notes"><code>list_notes</code></h4>
+<p>Lists note titles and IDs from Apple Notes.app with optional folder filtering.</p>
+<p><strong>Parameters:</strong><br />
+- <code>limit</code> (optional): Maximum number of notes to return (default: 50, max: 1000)<br />
+- <code>folder</code> (optional): Folder name to filter notes (case sensitive, if None, lists from all folders)</p>
+<p><strong>Returns:</strong><br />
+Array of objects with note titles and IDs</p>
+<p><strong>Example Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Meeting Notes&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9135&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Project Ideas&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9142&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<h4 id="get_notes"><code>get_notes</code></h4>
+<p>Retrieves specific notes by their IDs.</p>
+<p><strong>Parameters:</strong><br />
+- <code>ids</code>: List of note IDs to retrieve</p>
+<p><strong>Returns:</strong><br />
+- <code>notes</code>: Array of note objects with full content<br />
+- <code>found_count</code>: Number of notes successfully retrieved<br />
+- <code>not_found</code>: Array of IDs that were not found<br />
+- <code>message</code>: Status message</p>
+<p><strong>Example Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;notes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Meeting Notes&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;h1&gt;Meeting Notes&lt;/h1&gt;&lt;p&gt;Discussed project timeline...&lt;/p&gt;&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;plaintext&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Meeting Notes\nDiscussed project timeline...&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-15T10:30:00&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;modification_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-15T14:20:00&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;account&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iCloud&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;folder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Work&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9135&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;password_protected&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;found_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;not_found&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Found 1 of 1 requested notes&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="search_notes"><code>search_notes</code></h4>
+<p>Searches notes by body content or in note titles with configurable search type.</p>
+<p><strong>Parameters:</strong><br />
+- <code>query</code>: Search term or tag (use #tag format for tag search)<br />
+- <code>limit</code> (optional): Maximum number of results to return (default: 10, max: 100)<br />
+- <code>search_type</code> (optional): Where to search - "body" for note content, "name" for note titles (default: "body")</p>
+<p><strong>Returns:</strong><br />
+- <code>notes</code>: Array of matching notes with titles and IDs<br />
+- <code>found_count</code>: Number of notes found<br />
+- <code>query</code>: The search query used<br />
+- <code>search_type</code>: Type of search performed ("name" or "body")<br />
+- <code>message</code>: Status message</p>
+<p><strong>Example Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;notes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Project Planning&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9150&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;found_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;project&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;search_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;body&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Found 1 notes matching &#39;project&#39; in body&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="create_note"><code>create_note</code></h4>
+<p>Creates a new note with Markdown formatted body.</p>
+<p><strong>Parameters:</strong><br />
+- <code>title</code>: Title for the new note<br />
+- <code>body</code>: Body content in Markdown format<br />
+- <code>folder</code> (optional): Folder name to create note in (case sensitive, uses default folder if not specified)</p>
+<p><strong>Returns:</strong><br />
+- <code>success</code>: Boolean indicating if creation was successful<br />
+- <code>note</code>: Object with created note details (if successful)<br />
+- <code>message</code>: Status message</p>
+<p><strong>Example Response:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;note&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;New Project Idea&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9160&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;body_preview&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This is a revolutionary idea for improving...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-15T18:45:00&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;account&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iCloud&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;folder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ideas&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Successfully created note &#39;New Project Idea&#39; in folder &#39;Ideas&#39;&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="usage-examples">Usage Examples</h2>
+<h3 id="basic-workflow">Basic Workflow</h3>
+<ol>
+<li>
+<p><strong>List notes to get IDs:</strong><br />
+<code>python
+   notes = list_notes(limit=10, folder="Work")
+   # Returns: [{"title": "Meeting Notes", "id": "x-coredata://..."}, ...]</code></p>
+</li>
+<li>
+<p><strong>Get full content of specific notes:</strong><br />
+<code>python
+   full_notes = get_notes(["x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9135"])
+   # Returns full note content including body, plaintext, metadata</code></p>
+</li>
+<li>
+<p><strong>Search for notes:</strong><br />
+   ```python<br />
+   # Search in note content (default)<br />
+   results = search_notes("project timeline", limit=5)</p>
+</li>
+</ol>
+<p># Search in note titles only<br />
+   title_results = search_notes("Meeting", search_type="name", limit=5)</p>
+<p># Search for hashtags in content<br />
+   tag_results = search_notes("#urgent", limit=10)<br />
+   ```</p>
+<ol>
+<li><strong>Create a new note:</strong><br />
+<code>python
+   new_note = create_note(
+       title="Weekly Review",
+       body="Weekly Review\n\nAccomplishments:\n- Finished project X\n- Started project Y"
+   )</code></li>
+</ol>
+<h2 id="configuration">Configuration</h2>
+<p>The extension supports the following configuration options:</p>
+<ul>
+<li><strong>Debug Mode</strong>: Enable verbose logging for troubleshooting</li>
+<li>Set via environment variable: <code>DEBUG_MODE=true</code></li>
+<li>Or configure in your MCP client settings</li>
+</ul>
+<h2 id="permissions">Permissions</h2>
+<h3 id="first-time-setup">First-Time Setup</h3>
+<p>When first running the extension, macOS may prompt for permissions to access Apple Notes.app. Please grant these permissions for the extension to function properly.</p>
+<h3 id="troubleshooting-permissions">Troubleshooting Permissions</h3>
+<p>If you encounter permission issues:</p>
+<ol>
+<li>Open <strong>System Preferences</strong> → <strong>Security &amp; Privacy</strong> → <strong>Privacy</strong></li>
+<li>Look for entries related to your terminal or Python installation</li>
+<li>Ensure they have access to Apple Notes or Full Disk Access if needed</li>
+<li>Restart the MCP server after granting permissions</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="extension-not-working">Extension Not Working</h3>
+<ol>
+<li><strong>Check Claude Desktop Version</strong>:</li>
+<li>Ensure you're running Claude Desktop v0.10.0 or higher</li>
+<li>
+<p>Update Claude Desktop if needed</p>
+</li>
+<li>
+<p><strong>Verify Installation</strong>:</p>
+</li>
+<li>Go to Claude Desktop → Settings → Extensions</li>
+<li>Confirm "Apple Notes MCP" appears in the installed extensions list</li>
+<li>
+<p>If not listed, reinstall the extension</p>
+</li>
+<li>
+<p><strong>Grant Permissions</strong>:</p>
+</li>
+<li>Open <strong>System Preferences</strong> → <strong>Security &amp; Privacy</strong> → <strong>Privacy</strong></li>
+<li>Look for entries related to Claude Desktop or the terminal</li>
+<li>Ensure they have access to Apple Notes or Full Disk Access</li>
+<li>Restart Claude Desktop after granting permissions</li>
+</ol>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>"Permission denied" or "Unable to access Apple Notes"</strong>:<br />
+- Grant necessary macOS permissions as described above<br />
+- Try restarting both Apple Notes.app and Claude Desktop<br />
+- Ensure Apple Notes.app is not password-protected or locked</p>
+<p><strong>"No notes found" when you have notes</strong>:<br />
+- Check if your notes are in iCloud and properly synced<br />
+- Verify Apple Notes.app can access your notes directly<br />
+- Try creating a test note in Apple Notes.app</p>
+<p><strong>Extension appears installed but functions don't work</strong>:<br />
+- Restart Claude Desktop completely<br />
+- Check if there are any error messages in Claude Desktop<br />
+- Try reinstalling the extension</p>
+<h3 id="getting-help">Getting Help</h3>
+<p>If you continue to experience issues:</p>
+<ol>
+<li><strong>Check the error logs</strong> (enable debug mode if available)</li>
+<li><strong>Verify Apple Notes.app permissions</strong> in System Preferences</li>
+<li><strong>Ensure you're running on macOS</strong> with Apple Notes.app available</li>
+<li><strong>Create an issue</strong> in the <a href="https://github.com/mcolyer/mcp-apple-notes-py/issues">GitHub repository</a> with:</li>
+<li>Your macOS version</li>
+<li>Claude Desktop version  </li>
+<li>Extension version</li>
+<li>Error messages or screenshots</li>
+</ol>
+<h2 id="development">Development</h2>
+<h3 id="project-structure">Project Structure</h3>
+<div class="highlight"><pre><span></span><code><span class="nx">mcp</span><span class="o">-</span><span class="nx">apple</span><span class="o">-</span><span class="nx">notes</span><span class="o">-</span><span class="nx">py</span><span class="o">/</span>
+<span class="w"></span><span class="err">  </span><span class="w"> </span><span class="nx">main</span><span class="p">.</span><span class="nx">py</span><span class="w">              </span><span class="err">#</span><span class="w"> </span><span class="nx">MCP</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="nx">implementation</span>
+<span class="w"></span><span class="err">  </span><span class="w"> </span><span class="nx">manifest</span><span class="p">.</span><span class="nx">json</span><span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nx">DXT</span><span class="w"> </span><span class="nx">manifest</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">packaging</span>
+<span class="w"></span><span class="err">  </span><span class="w"> </span><span class="nx">pyproject</span><span class="p">.</span><span class="nx">toml</span><span class="w">       </span><span class="err">#</span><span class="w"> </span><span class="nx">Python</span><span class="w"> </span><span class="nx">project</span><span class="w"> </span><span class="nx">configuration</span>
+<span class="err">  </span><span class="w"> </span><span class="nx">README</span><span class="p">.</span><span class="nx">md</span><span class="w">           </span><span class="err">#</span><span class="w"> </span><span class="nx">This</span><span class="w"> </span><span class="nx">file</span>
+</code></pre></div>
+
+<h3 id="building-dxt-package">Building DXT Package</h3>
+<p>To package as a DXT extension:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Build DXT package with all dependencies bundled</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>scripts/package_dxt.py
+
+<span class="c1"># This creates a .dxt file ready for distribution</span>
+</code></pre></div>
+
+<h3 id="testing">Testing</h3>
+<p>Test the server locally:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install dependencies</span>
+uv<span class="w"> </span>sync
+
+<span class="c1"># Run server</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>main.py
+
+<span class="c1"># Run test suite (44 tests)</span>
+uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-v
+
+<span class="c1"># Test specific functions</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from main import list_notes; print(&#39;Import successful&#39;)&quot;</span>
+</code></pre></div>
+
+<h2 id="limitations">Limitations</h2>
+<ul>
+<li><strong>macOS Only</strong>: Only works on macOS with Apple Notes.app</li>
+<li><strong>Password-Protected Notes</strong>: Limited support for password-protected notes</li>
+<li><strong>Top-Level Folders</strong>: Only accesses top-level folders in Apple Notes</li>
+<li><strong>Attachments</strong>: Note attachments are not currently processed</li>
+<li><strong>No Note Modification</strong>: Cannot modify existing notes (only create new ones)</li>
+<li><strong>HTML Conversion</strong>: Markdown is converted to HTML for Apple Notes compatibility</li>
+<li><strong>Search Performance</strong>: Body content searches may be slower than title searches. Use <code>search_type="name"</code> for faster title-only searches.</li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<p>The extension includes comprehensive error handling:</p>
+<ul>
+<li><strong>Import Errors</strong>: Clear messages if dependencies are missing</li>
+<li><strong>Permission Errors</strong>: Helpful guidance for macOS permission issues</li>
+<li><strong>Connection Errors</strong>: Graceful handling of Apple Notes.app connectivity issues</li>
+<li><strong>Individual Note Errors</strong>: Continues processing other notes if one fails</li>
+</ul>
+<h2 id="contributing">Contributing</h2>
+<p>Contributions are welcome! Please ensure:</p>
+<ol>
+<li>Code follows the existing style and patterns</li>
+<li>Error handling is comprehensive</li>
+<li>Changes are tested on macOS</li>
+<li>Documentation is updated accordingly</li>
+</ol>
+<h2 id="license">License</h2>
+<p>MIT License - see LICENSE file for details</p>
+<h2 id="support">Support</h2>
+<p>For issues and support:<br />
+1. Check the error logs (enable debug mode for detailed logging)<br />
+2. Verify Apple Notes.app permissions<br />
+3. Ensure you're running on macOS with Apple Notes.app available<br />
+4. Create an issue in the project repository</p>
+</body>
+</html>

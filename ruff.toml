@@ -1,0 +1,43 @@
+# Target Python 3.13
+target-version = "py313"
+
+# Include main.py and tests directory
+include = ["main.py", "tests/**/*.py", "scripts/**/*.py"]
+
+# Line length to match project style
+line-length = 88
+
+[lint]
+# Enable key rule categories
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "N",   # pep8-naming
+    "S",   # flake8-bandit (security)
+    "C4",  # flake8-comprehensions
+    "T20", # flake8-print
+]
+
+# Ignore specific rules that may conflict with project style
+ignore = [
+    "T201", # Allow print statements (needed for MCP server output)
+    "S101", # Allow assert statements (common in tests)
+]
+
+[lint.per-file-ignores]
+# Allow broader rule exceptions in test files
+"tests/**/*.py" = [
+    "S101", # assert statements are expected in tests
+    "B011", # assert False is acceptable in tests
+]
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+
+# Don't format docstrings
+docstring-code-format = false
