@@ -1,8 +1,6 @@
 # Apple Notes MCP Desktop Extension
 
-[![Test](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml)
-[![Code Quality](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml)
-[![Release](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml)
+[![Test](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml) [![Code Quality](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml) [![Release](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml)
 
 A Desktop Extension (DXT) that provides access to Apple Notes through the Model Context Protocol (MCP). This extension allows AI assistants to list and retrieve notes from your local Apple Notes.app.
 
