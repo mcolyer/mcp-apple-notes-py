@@ -297,8 +297,15 @@ def search_notes(query: str, limit: int = 10, search_type: str = "body") -> Dict
                     
         except Exception as search_error:
             logger.error(f"Error with noteslist search: {search_error}")
-            # Fallback to empty results
-            matching_notes = []
+            # Return error response
+            return {
+                "notes": [],
+                "found_count": 0,
+                "query": query,
+                "search_type": "error",
+                "error": f"Error with noteslist search: {search_error}",
+                "message": "Failed to search notes"
+            }
         
         logger.info(f"Search completed: found {len(matching_notes)} matches using built-in {search_type} search")
         
@@ -374,7 +381,7 @@ def create_note(title: str, body: str) -> Dict[str, Any]:
         except Exception as md_error:
             logger.warning(f"Markdown conversion failed, using plain text: {md_error}")
             # Fallback to plain text with basic HTML formatting
-            html_body = body.replace('\\n', '<br>')
+            html_body = body.replace('\n', '<br>')
         
         # Create the note in default folder
         try:
