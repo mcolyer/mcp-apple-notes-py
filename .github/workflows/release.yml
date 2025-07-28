@@ -75,6 +75,34 @@ jobs:
             json.dump(manifest, f, indent=2)
         "
         
+    - name: Update CHANGELOG.md for release
+      run: |
+        python -c "
+        import re
+        from datetime import datetime
+        
+        # Read current changelog
+        with open('CHANGELOG.md', 'r') as f:
+            content = f.read()
+        
+        # Replace [Unreleased] with version and date
+        today = datetime.now().strftime('%Y-%m-%d')
+        version_header = f'## [${{ steps.version.outputs.version }}] - {today}'
+        
+        # Replace the first [Unreleased] section with the version
+        content = re.sub(
+            r'## \[Unreleased\]',
+            f'## [Unreleased]\n\n### Added\n- Future changes will be documented here\n\n{version_header}',
+            content,
+            count=1
+        )
+        
+        with open('CHANGELOG.md', 'w') as f:
+            f.write(content)
+        
+        print(f'Updated CHANGELOG.md with version ${{ steps.version.outputs.version }}')
+        "
+        
     - name: Build DXT package
       run: |
         uv run python scripts/package_dxt.py
@@ -118,9 +146,15 @@ jobs:
           - Python 3.13 or higher
           - Apple Notes.app access permissions
           
-          ## What's New
+          ## What's New in v${{ steps.version.outputs.version }}
           
-          See the commit history for detailed changes in this release.
+          See [CHANGELOG.md](https://github.com/mcolyer/mcp-apple-notes-py/blob/main/CHANGELOG.md) for detailed changes in this release.
+
+          **Highlights:**
+          - Performance optimizations using efficient `noteslist()` method
+          - Comprehensive test suite with 44 automated tests  
+          - GitHub Actions CI/CD with automated releases
+          - Professional DXT packaging and distribution
           
           ---
           

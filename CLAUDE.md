@@ -8,6 +8,15 @@ This is a Desktop Extension (DXT) that provides access to Apple Notes through th
 
 ## Development Guidelines
 
+### Development Workflow
+- **Always commit** your work at logical points along the way
+- **IMPORTANT**: Always update CHANGELOG.md before committing significant changes
+  - Add new features to the "Unreleased" section with proper categorization
+  - Use format: Added/Changed/Deprecated/Removed/Fixed/Security
+  - Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
+- **Run tests** before committing: `uv run pytest tests/ -v`
+- **Check code quality** before pushing: ensure no deprecated `notes()` usage
+
 ### Package Management
 - **Use UV**: Always use `uv` for dependency management and virtual environment handling
 - **Sync dependencies**: Run `uv sync` to install/update dependencies
@@ -115,6 +124,7 @@ mcp-apple-notes-py/
 ├── pytest.ini          # Pytest configuration
 ├── README.md           # User documentation
 ├── CLAUDE.md           # This file - development guidelines
+├── CHANGELOG.md        # Version history and release notes
 ├── .github/            # GitHub Actions workflows
 │   └── workflows/      # CI/CD automation
 │       ├── README.md   # Workflow documentation
