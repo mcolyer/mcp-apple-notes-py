@@ -149,12 +149,6 @@ jobs:
           ## What's New in v${{ steps.version.outputs.version }}
           
           See [CHANGELOG.md](https://github.com/mcolyer/mcp-apple-notes-py/blob/main/CHANGELOG.md) for detailed changes in this release.
-
-          **Highlights:**
-          - Performance optimizations using efficient `noteslist()` method
-          - Comprehensive test suite with 44 automated tests  
-          - GitHub Actions CI/CD with automated releases
-          - Professional DXT packaging and distribution
           
           ---
           

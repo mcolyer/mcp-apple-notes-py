@@ -235,8 +235,7 @@ Creates a new note with Markdown formatted body.
    ```python
    new_note = create_note(
        title="Weekly Review",
-       body="# Weekly Review\n\n## Accomplishments\n- Finished project X\n- Started project Y",
-       folder="Work"
+       body="Weekly Review\n\nAccomplishments:\n- Finished project X\n- Started project Y"
    )
    ```
 
@@ -256,7 +255,7 @@ When first running the extension, macOS may prompt for permissions to access App
 ### Troubleshooting Permissions
 If you encounter permission issues:
 
-1. Open **System Preferences** � **Security & Privacy** � **Privacy**
+1. Open **System Preferences** → **Security & Privacy** → **Privacy**
 2. Look for entries related to your terminal or Python installation
 3. Ensure they have access to Apple Notes or Full Disk Access if needed
 4. Restart the MCP server after granting permissions
