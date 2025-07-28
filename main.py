@@ -233,41 +233,52 @@ def search_notes(query: str, limit: int = 10) -> Dict[str, Any]:
             # For content search, split query into words for better matching
             search_terms = [query.strip()]
         
-        # Get all notes for searching
-        filtered_notes = notes_app.notes()
-        
-        # Perform search
-        matching_notes = []
-        
-        for note in filtered_notes:
-            try:
-                if not note.name and not note.body:
-                    continue
-                    
-                # Get searchable text (combine name and body)
-                searchable_text = f"{note.name or ''} {note.body or ''} {note.plaintext or ''}".lower()
-                
-                # Check if any search term matches
-                found_match = False
-                for term in search_terms:
-                    if term.lower() in searchable_text:
-                        found_match = True
-                        break
-                
-                if found_match:
+        # Use built-in search functionality for much better performance
+        try:
+            # Use the library's built-in text search
+            matching_note_objects = notes_app.notes(text=search_terms)
+            logger.debug(f"Built-in search found {len(matching_note_objects)} notes")
+            
+            # Convert to our format and apply limit
+            matching_notes = []
+            for note in matching_note_objects[:limit]:
+                try:
                     note_info = {
                         "title": note.name or "Untitled",
-                        "id": note.id
+                        "id": getattr(note, 'id', 'unknown')
                     }
                     matching_notes.append(note_info)
+                except Exception as note_error:
+                    logger.debug(f"Error processing search result: {note_error}")
+                    continue
+            
+            logger.info(f"Search completed: found {len(matching_notes)} matches using built-in search")
+            
+        except Exception as search_error:
+            logger.warning(f"Built-in search failed: {search_error}, falling back to manual search")
+            
+            # Fallback to title-only search if built-in search fails
+            all_notes = notes_app.notes()
+            matching_notes = []
+            
+            for note in all_notes:
+                if len(matching_notes) >= limit:
+                    break
                     
-                    # Stop if we've reached the limit
-                    if len(matching_notes) >= limit:
-                        break
-                        
-            except Exception as note_error:
-                logger.warning(f"Error processing note during search: {note_error}")
-                continue
+                try:
+                    note_title = (note.name or "").lower()
+                    for term in search_terms:
+                        if term.lower() in note_title:
+                            note_info = {
+                                "title": note.name or "Untitled",
+                                "id": getattr(note, 'id', 'unknown')
+                            }
+                            matching_notes.append(note_info)
+                            break
+                except Exception:
+                    continue
+            
+            logger.info(f"Fallback search completed: found {len(matching_notes)} matches in titles")
         
         result = {
             "notes": matching_notes,
