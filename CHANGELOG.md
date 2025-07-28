@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced development documentation with UV package manager usage
 - Improved error handling consistency across all functions
 
-## [0.1.0] - 2025-01-XX
+## [0.1.0] - 2025-07-28
 
 ### Added
 - **Core MCP Functions**:
