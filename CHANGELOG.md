@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Future changes will be documented here
+
+## [0.2.0] - 2025-07-28
+
+### Added
 - Comprehensive GitHub Actions CI/CD workflows
 - Automated DXT package building and releases
 - Status badges for test, quality, and release workflows
@@ -18,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README with professional DXT installation instructions
 - Enhanced development documentation with UV package manager usage
 - Improved error handling consistency across all functions
+
+### Fixed
+- GitHub Actions release workflow now uses modern gh CLI instead of deprecated actions
 
 ## [0.1.0] - 2025-07-28
 
@@ -87,8 +95,8 @@ This project uses automated releases via GitHub Actions:
 5. **Distribution**: DXT file available for download and installation
 
 ### Version Tags
+- `v0.2.0` - Enhanced CI/CD workflows and improved documentation
 - `v0.1.0` - Initial release with core functionality
-- Future releases will follow semantic versioning
 
 ### Installation
 Download the latest `.dxt` file from [GitHub Releases](https://github.com/mcolyer/mcp-apple-notes-py/releases) and install via Claude Desktop → Settings → Extensions.
