@@ -1,28 +1,27 @@
 # Apple Notes MCP Desktop Extension
 
-[![Test](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml) [![Code Quality](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml) [![Release](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml)
+![Test](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)
+![Code Quality](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)
+![Release](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/release.yml/badge.svg)
 
 A Desktop Extension (DXT) that provides access to Apple Notes through the Model Context Protocol (MCP). This extension allows AI assistants to list and retrieve notes from your local Apple Notes.app.
 
-## 🚀 Quick Start
+## Quick Start
 
-1. **[Download the latest .dxt file](https://github.com/mcolyer/mcp-apple-notes-py/releases/latest)**
-2. **Open Claude Desktop** → **Settings** → **Extensions**
+1. **Download the latest .dxt file**: Go to [releases](https://github.com/mcolyer/mcp-apple-notes-py/releases/latest)
+2. **Open Claude Desktop** and go to **Settings** > **Extensions**
 3. **Click "Install Extension"** and select the downloaded `.dxt` file
 4. **Restart Claude Desktop** and grant Apple Notes permissions when prompted
 
-✅ **Ready to use!** Claude can now access your Apple Notes.
+Ready to use! Claude can now access your Apple Notes.
 
 ## Features
 
-- **List Notes**: Retrieve note titles and IDs from Apple Notes.app with optional folder filtering
+- **List Notes**: Retrieve note titles and IDs from Apple Notes.app
 - **Get Notes**: Retrieve full note content by ID for efficient access
-- **Search Notes**: Search notes by text content or tags with optional folder filtering
+- **Search Notes**: Search notes by text content or tags with hashtag support
 - **Create Notes**: Create new notes with Markdown formatting support
-- **Folder Support**: Filter operations by specific Apple Notes folders
-- **Tag Search**: Search for notes containing specific hashtags (e.g., #work, #personal)
 - **Error Handling**: Comprehensive error handling with clear messages
-- **Debug Mode**: Optional verbose logging for troubleshooting
 - **macOS Integration**: Native integration with Apple Notes.app
 
 ## Requirements
@@ -35,15 +34,13 @@ A Desktop Extension (DXT) that provides access to Apple Notes through the Model 
 
 ### Option 1: DXT Package (Recommended)
 
-The easiest way to install this extension is using the pre-built DXT package:
-
 1. **Download the latest DXT file**:
    - Go to the [latest release](https://github.com/mcolyer/mcp-apple-notes-py/releases/latest)
    - Download the `.dxt` file from the release assets
 
 2. **Install in Claude Desktop**:
    - Open Claude Desktop
-   - Go to **Settings** → **Extensions**
+   - Go to **Settings** > **Extensions**
    - Click **"Install Extension"**
    - Select the downloaded `.dxt` file
    - Click **"Install"**
@@ -84,14 +81,13 @@ For development or if you want to build from source:
 ### Available Tools
 
 #### `list_notes`
-Lists note titles and IDs from Apple Notes.app with optional folder filtering.
+
+Lists note titles and IDs from Apple Notes.app.
 
 **Parameters:**
 - `limit` (optional): Maximum number of notes to return (default: 50, max: 1000)
-- `folder` (optional): Folder name to filter notes (case sensitive, if None, lists from all folders)
 
-**Returns:**
-Array of objects with note titles and IDs
+**Returns:** Array of objects with note titles and IDs
 
 **Example Response:**
 ```json
@@ -99,15 +95,12 @@ Array of objects with note titles and IDs
   {
     "title": "Meeting Notes",
     "id": "x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9135"
-  },
-  {
-    "title": "Project Ideas",
-    "id": "x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9142"
   }
 ]
 ```
 
 #### `get_notes`
+
 Retrieves specific notes by their IDs.
 
 **Parameters:**
@@ -119,30 +112,9 @@ Retrieves specific notes by their IDs.
 - `not_found`: Array of IDs that were not found
 - `message`: Status message
 
-**Example Response:**
-```json
-{
-  "notes": [
-    {
-      "name": "Meeting Notes",
-      "body": "<h1>Meeting Notes</h1><p>Discussed project timeline...</p>",
-      "plaintext": "Meeting Notes\nDiscussed project timeline...",
-      "creation_date": "2025-01-15T10:30:00",
-      "modification_date": "2025-01-15T14:20:00",
-      "account": "iCloud",
-      "folder": "Work",
-      "id": "x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9135",
-      "password_protected": false
-    }
-  ],
-  "found_count": 1,
-  "not_found": [],
-  "message": "Found 1 of 1 requested notes"
-}
-```
-
 #### `search_notes`
-Searches notes by body content or in note titles with configurable search type.
+
+Searches notes by body content or in note titles.
 
 **Parameters:**
 - `query`: Search term or tag (use #tag format for tag search)
@@ -153,53 +125,21 @@ Searches notes by body content or in note titles with configurable search type.
 - `notes`: Array of matching notes with titles and IDs
 - `found_count`: Number of notes found
 - `query`: The search query used
-- `search_type`: Type of search performed ("name" or "body")
+- `search_type`: Type of search performed
 - `message`: Status message
 
-**Example Response:**
-```json
-{
-  "notes": [
-    {
-      "title": "Project Planning",
-      "id": "x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9150"
-    }
-  ],
-  "found_count": 1,
-  "query": "project",
-  "search_type": "body",
-  "message": "Found 1 notes matching 'project' in body"
-}
-```
-
 #### `create_note`
+
 Creates a new note with Markdown formatted body.
 
 **Parameters:**
 - `title`: Title for the new note
 - `body`: Body content in Markdown format
-- `folder` (optional): Folder name to create note in (case sensitive, uses default folder if not specified)
 
 **Returns:**
 - `success`: Boolean indicating if creation was successful
 - `note`: Object with created note details (if successful)
 - `message`: Status message
-
-**Example Response:**
-```json
-{
-  "success": true,
-  "note": {
-    "name": "New Project Idea",
-    "id": "x-coredata://0EA5F4CA-F669-4BB5-B24B-EF828876E597/ICNote/p9160",
-    "body_preview": "This is a revolutionary idea for improving...",
-    "creation_date": "2025-01-15T18:45:00",
-    "account": "iCloud",
-    "folder": "Ideas"
-  },
-  "message": "Successfully created note 'New Project Idea' in folder 'Ideas'"
-}
-```
 
 ## Usage Examples
 
@@ -207,7 +147,7 @@ Creates a new note with Markdown formatted body.
 
 1. **List notes to get IDs:**
    ```python
-   notes = list_notes(limit=10, folder="Work")
+   notes = list_notes(limit=10)
    # Returns: [{"title": "Meeting Notes", "id": "x-coredata://..."}, ...]
    ```
 
@@ -237,45 +177,13 @@ Creates a new note with Markdown formatted body.
    )
    ```
 
-## Configuration
-
-The extension supports the following configuration options:
-
-- **Debug Mode**: Enable verbose logging for troubleshooting
-  - Set via environment variable: `DEBUG_MODE=true`
-  - Or configure in your MCP client settings
-
-## Permissions
-
-### First-Time Setup
-When first running the extension, macOS may prompt for permissions to access Apple Notes.app. Please grant these permissions for the extension to function properly.
-
-### Troubleshooting Permissions
-If you encounter permission issues:
-
-1. Open **System Preferences** → **Security & Privacy** → **Privacy**
-2. Look for entries related to your terminal or Python installation
-3. Ensure they have access to Apple Notes or Full Disk Access if needed
-4. Restart the MCP server after granting permissions
-
 ## Troubleshooting
 
 ### Extension Not Working
 
-1. **Check Claude Desktop Version**:
-   - Ensure you're running Claude Desktop v0.10.0 or higher
-   - Update Claude Desktop if needed
-
-2. **Verify Installation**:
-   - Go to Claude Desktop → Settings → Extensions
-   - Confirm "Apple Notes MCP" appears in the installed extensions list
-   - If not listed, reinstall the extension
-
-3. **Grant Permissions**:
-   - Open **System Preferences** → **Security & Privacy** → **Privacy**
-   - Look for entries related to Claude Desktop or the terminal
-   - Ensure they have access to Apple Notes or Full Disk Access
-   - Restart Claude Desktop after granting permissions
+1. **Check Claude Desktop Version**: Ensure you're running Claude Desktop v0.10.0 or higher
+2. **Verify Installation**: Go to Claude Desktop > Settings > Extensions and confirm "Apple Notes MCP" appears
+3. **Grant Permissions**: Open **System Preferences** > **Security & Privacy** > **Privacy** and ensure access to Apple Notes
 
 ### Common Issues
 
@@ -289,47 +197,49 @@ If you encounter permission issues:
 - Verify Apple Notes.app can access your notes directly
 - Try creating a test note in Apple Notes.app
 
-**Extension appears installed but functions don't work**:
-- Restart Claude Desktop completely
-- Check if there are any error messages in Claude Desktop
-- Try reinstalling the extension
-
 ### Getting Help
 
 If you continue to experience issues:
 
-1. **Check the error logs** (enable debug mode if available)
-2. **Verify Apple Notes.app permissions** in System Preferences
-3. **Ensure you're running on macOS** with Apple Notes.app available
-4. **Create an issue** in the [GitHub repository](https://github.com/mcolyer/mcp-apple-notes-py/issues) with:
-   - Your macOS version
-   - Claude Desktop version  
-   - Extension version
-   - Error messages or screenshots
+1. Check the error logs (enable debug mode if available)
+2. Verify Apple Notes.app permissions in System Preferences
+3. Ensure you're running on macOS with Apple Notes.app available
+4. Create an issue in the [GitHub repository](https://github.com/mcolyer/mcp-apple-notes-py/issues)
 
 ## Development
 
 ### Project Structure
+
 ```
 mcp-apple-notes-py/
-   main.py              # MCP server implementation
-   manifest.json        # DXT manifest for packaging
-   pyproject.toml       # Python project configuration
-   README.md           # This file
+├── main.py              # MCP server implementation
+├── manifest.json        # DXT manifest for packaging
+├── pyproject.toml       # Python project configuration
+├── pytest.ini          # Pytest configuration
+├── README.md           # User documentation
+├── CLAUDE.md           # Development guidelines
+├── CHANGELOG.md        # Version history
+├── .github/            # GitHub Actions workflows
+│   └── workflows/      # CI/CD automation
+├── scripts/            # Build and utility scripts
+│   └── package_dxt.py  # DXT packaging script
+├── tests/              # Test suite (44 tests)
+│   ├── conftest.py     # Shared fixtures
+│   ├── test_list_notes.py
+│   ├── test_search_notes.py
+│   ├── test_get_notes.py
+│   └── test_create_note.py
+└── .venv/              # Virtual environment
 ```
 
 ### Building DXT Package
-To package as a DXT extension:
 
 ```bash
 # Build DXT package with all dependencies bundled
 uv run python scripts/package_dxt.py
-
-# This creates a .dxt file ready for distribution
 ```
 
 ### Testing
-Test the server locally:
 
 ```bash
 # Install dependencies
@@ -349,20 +259,9 @@ uv run python -c "from main import list_notes; print('Import successful')"
 
 - **macOS Only**: Only works on macOS with Apple Notes.app
 - **Password-Protected Notes**: Limited support for password-protected notes
-- **Top-Level Folders**: Only accesses top-level folders in Apple Notes
 - **Attachments**: Note attachments are not currently processed
 - **No Note Modification**: Cannot modify existing notes (only create new ones)
 - **HTML Conversion**: Markdown is converted to HTML for Apple Notes compatibility
-- **Search Performance**: Body content searches may be slower than title searches. Use `search_type="name"` for faster title-only searches.
-
-## Error Handling
-
-The extension includes comprehensive error handling:
-
-- **Import Errors**: Clear messages if dependencies are missing
-- **Permission Errors**: Helpful guidance for macOS permission issues
-- **Connection Errors**: Graceful handling of Apple Notes.app connectivity issues
-- **Individual Note Errors**: Continues processing other notes if one fails
 
 ## Contributing
 
