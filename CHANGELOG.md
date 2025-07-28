@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Future changes will be documented here
 
+## [0.2.2] - 2025-07-28
+
+### Fixed
+- Added required permissions (contents:write, packages:write) to GitHub Actions release workflow
+- Resolved "Resource not accessible by integration" error preventing automated releases
+- GitHub Actions workflows can now successfully create releases and upload DXT packages
+
 ## [0.2.1] - 2025-07-28
 
 ### Fixed
@@ -102,6 +109,7 @@ This project uses automated releases via GitHub Actions:
 5. **Distribution**: DXT file available for download and installation
 
 ### Version Tags
+- `v0.2.2` - Fixed GitHub Actions release workflow permissions
 - `v0.2.1` - Fixed GitHub Actions release workflow syntax errors
 - `v0.2.0` - Enhanced CI/CD workflows and improved documentation
 - `v0.1.0` - Initial release with core functionality
