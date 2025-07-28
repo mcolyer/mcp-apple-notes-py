@@ -114,58 +114,47 @@ jobs:
         echo "filename=$DXT_FILE" >> $GITHUB_OUTPUT
         echo "Found DXT file: $DXT_FILE"
         
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Create Release with gh CLI
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ steps.version.outputs.tag }}
-        release_name: Apple Notes MCP v${{ steps.version.outputs.version }}
-        body: |
-          # Apple Notes MCP Desktop Extension v${{ steps.version.outputs.version }}
-          
-          ## Installation
-          
-          1. Download the `.dxt` file from the assets below
-          2. Open Claude Desktop
-          3. Go to Settings → Extensions
-          4. Click "Install Extension" and select the downloaded `.dxt` file
-          5. Restart Claude Desktop to activate the extension
-          
-          ## Features
-          
-          - **List Notes**: Retrieve note titles and IDs from Apple Notes.app
-          - **Get Notes**: Retrieve full note content by ID for efficient access
-          - **Search Notes**: Search notes by text content or tags with hashtag support
-          - **Create Notes**: Create new notes with Markdown formatting support
-          
-          ## Requirements
-          
-          - macOS (Apple Notes.app required)
-          - Python 3.13 or higher
-          - Apple Notes.app access permissions
-          
-          ## What's New in v${{ steps.version.outputs.version }}
-          
-          See [CHANGELOG.md](https://github.com/mcolyer/mcp-apple-notes-py/blob/main/CHANGELOG.md) for detailed changes in this release.
-          
-          ---
-          
-          **Note**: This extension requires macOS permissions to access Apple Notes.app. 
-          Grant permissions when prompted for the extension to function properly.
-        draft: false
-        prerelease: false
+      run: |
+        gh release create "${{ steps.version.outputs.tag }}" \
+          --title "Apple Notes MCP v${{ steps.version.outputs.version }}" \
+          --notes "$(cat <<'EOF'
+        # Apple Notes MCP Desktop Extension v${{ steps.version.outputs.version }}
         
-    - name: Upload DXT Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.dxt_file.outputs.filename }}
-        asset_name: ${{ steps.dxt_file.outputs.filename }}
-        asset_content_type: application/zip
+        ## Installation
+        
+        1. Download the `.dxt` file from the assets below
+        2. Open Claude Desktop
+        3. Go to Settings → Extensions
+        4. Click "Install Extension" and select the downloaded `.dxt` file
+        5. Restart Claude Desktop to activate the extension
+        
+        ## Features
+        
+        - **List Notes**: Retrieve note titles and IDs from Apple Notes.app
+        - **Get Notes**: Retrieve full note content by ID for efficient access
+        - **Search Notes**: Search notes by text content or tags with hashtag support
+        - **Create Notes**: Create new notes with Markdown formatting support
+        
+        ## Requirements
+        
+        - macOS (Apple Notes.app required)
+        - Python 3.13 or higher
+        - Apple Notes.app access permissions
+        
+        ## What's New in v${{ steps.version.outputs.version }}
+        
+        See [CHANGELOG.md](https://github.com/mcolyer/mcp-apple-notes-py/blob/main/CHANGELOG.md) for detailed changes in this release.
+        
+        ---
+        
+        **Note**: This extension requires macOS permissions to access Apple Notes.app. 
+        Grant permissions when prompted for the extension to function properly.
+        EOF
+        )" \
+          ./${{ steps.dxt_file.outputs.filename }}
         
     - name: Upload DXT as Artifact
       uses: actions/upload-artifact@v4
