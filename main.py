@@ -200,14 +200,14 @@ def get_notes(ids: List[str]) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-def search_notes(query: str, limit: int = 10, search_type: str = "text") -> Dict[str, Any]:
+def search_notes(query: str, limit: int = 10, search_type: str = "body") -> Dict[str, Any]:
     """
-    Search notes by text content or in note titles
+    Search notes by body content or in note titles
     
     Args:
         query: Search term or tag (use #tag format for tag search)
         limit: Maximum number of results to return (default: 10, max: 100)
-        search_type: Where to search - "text" for note content, "name" for note titles (default: "text")
+        search_type: Where to search - "body" for note content, "name" for note titles (default: "body")
     
     Returns:
         Dictionary containing matching notes with titles and IDs
@@ -231,8 +231,8 @@ def search_notes(query: str, limit: int = 10, search_type: str = "text") -> Dict
             limit = 100
             
         # Validate search_type parameter
-        if search_type not in ["text", "name"]:
-            search_type = "text"
+        if search_type not in ["body", "name"]:
+            search_type = "body"
             
         logger.info(f"Searching notes for: '{query}' in {search_type} (limit: {limit})")
         
@@ -248,9 +248,9 @@ def search_notes(query: str, limit: int = 10, search_type: str = "text") -> Dict
             if search_type == "name":
                 matching_note_objects = notes_app.notes(name=search_terms)
                 logger.debug(f"Built-in name search found {len(matching_note_objects)} notes")
-            else:  # search_type == "text"
-                matching_note_objects = notes_app.notes(text=search_terms)
-                logger.debug(f"Built-in text search found {len(matching_note_objects)} notes")
+            else:  # search_type == "body"
+                matching_note_objects = notes_app.notes(body=search_terms)
+                logger.debug(f"Built-in body search found {len(matching_note_objects)} notes")
             
             # Convert to our format and apply limit
             matching_notes = []
