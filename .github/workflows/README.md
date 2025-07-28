@@ -57,8 +57,8 @@ To create a new release:
 Add these badges to your README.md:
 
 ```markdown
-[![Test](https://github.com/YOUR_USERNAME/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)](https://github.com/YOUR_USERNAME/mcp-apple-notes-py/actions/workflows/test.yml)
-[![Code Quality](https://github.com/YOUR_USERNAME/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)](https://github.com/YOUR_USERNAME/mcp-apple-notes-py/actions/workflows/quality.yml)
+[![Test](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/test.yml)
+[![Code Quality](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml/badge.svg)](https://github.com/mcolyer/mcp-apple-notes-py/actions/workflows/quality.yml)
 ```
 
 ## Requirements
