@@ -52,23 +52,25 @@ def list_notes(limit: int = 50) -> List[Dict[str, str]]:
         # Initialize Notes app connection
         notes_app = NotesApp()
         
-        # Get all notes
-        all_notes = notes_app.notes()
+        # Use noteslist to get all notes efficiently
+        noteslist_obj = notes_app.noteslist()
         
-        if not all_notes:
+        if len(noteslist_obj) == 0:
             logger.info("No notes found in Apple Notes")
             return []
         
-        # Limit the results
-        limited_notes = all_notes[:limit]
+        # Extract note names and IDs from noteslist
+        note_names = noteslist_obj.name
+        note_ids = noteslist_obj.id
         
-        # Extract note titles and IDs
+        # Create note data with limit
         note_data = []
-        for note in limited_notes:
+        for i, (name, note_id) in enumerate(zip(note_names, note_ids)):
+            if i >= limit:
+                break
             try:
-                title = getattr(note, 'name', None) or "Untitled"
-                note_id = getattr(note, 'id', None) or "unknown"
-                note_data.append({"title": title, "id": note_id})
+                title = name or "Untitled"
+                note_data.append({"title": title, "id": note_id or "unknown"})
                 logger.debug(f"Added note: {title} (ID: {note_id})")
                 
             except Exception as note_error:
