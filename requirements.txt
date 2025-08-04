@@ -1,2 +1,4 @@
 mcp[cli]
 macnotesapp
+markdown
+apple-notes-parser
