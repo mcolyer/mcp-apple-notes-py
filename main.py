@@ -60,9 +60,9 @@ def list_notes(limit: int = 50, folder: str = None) -> list[dict[str, str]]:
             for note in all_notes:
                 try:
                     # Get folder name from note
-                    note_folder = getattr(note, 'folder_name', None)
-                    if not note_folder and hasattr(note, 'folder'):
-                        note_folder = getattr(note.folder, 'name', None)
+                    note_folder = getattr(note, "folder_name", None)
+                    if not note_folder and hasattr(note, "folder"):
+                        note_folder = getattr(note.folder, "name", None)
 
                     # Case-insensitive folder matching
                     if note_folder and folder.lower() in note_folder.lower():
@@ -338,9 +338,7 @@ def search_notes(query: str, limit: int = 10) -> dict[str, Any]:
             "found_count": len(formatted_notes),
             "query": query,
             "search_type": return_search_type,
-            "message": (
-                f"Found {len(formatted_notes)} notes matching '{query}'"
-            ),
+            "message": (f"Found {len(formatted_notes)} notes matching '{query}'"),
         }
 
         logger.info(f"Search completed: {len(formatted_notes)} results for '{query}'")

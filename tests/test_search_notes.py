@@ -126,7 +126,7 @@ class TestSearchNotes:
         """Test handling of import error"""
         with patch(
             "apple_notes_parser.AppleNotesParser",
-            side_effect=ImportError("apple-notes-parser not available")
+            side_effect=ImportError("apple-notes-parser not available"),
         ):
             result = search_notes("test")
 
@@ -138,7 +138,7 @@ class TestSearchNotes:
         """Test handling of general exceptions during search"""
         with patch(
             "apple_notes_parser.AppleNotesParser",
-            side_effect=Exception("Database failed")
+            side_effect=Exception("Database failed"),
         ):
             result = search_notes("test")
 

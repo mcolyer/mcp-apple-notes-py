@@ -86,7 +86,7 @@ class TestListNotes:
         for i, title in enumerate([None, "Valid Note", ""]):
             mock_note = Mock()
             mock_note.title = title
-            mock_note.id = f"id{i+1}"
+            mock_note.id = f"id{i + 1}"
             mock_notes.append(mock_note)
 
         mock_parser = Mock()
@@ -102,11 +102,15 @@ class TestListNotes:
 
     def test_list_notes_import_error(self):
         """Test handling of import error"""
-        with patch(
-            "apple_notes_parser.AppleNotesParser",
-            side_effect=ImportError("apple-notes-parser not available")
-        ), patch(
-            "macnotesapp.NotesApp", side_effect=ImportError("macnotesapp not available")
+        with (
+            patch(
+                "apple_notes_parser.AppleNotesParser",
+                side_effect=ImportError("apple-notes-parser not available"),
+            ),
+            patch(
+                "macnotesapp.NotesApp",
+                side_effect=ImportError("macnotesapp not available"),
+            ),
         ):
             result = list_notes()
 
@@ -116,10 +120,13 @@ class TestListNotes:
         """Test handling of general exceptions"""
         mock_notes_app.noteslist.side_effect = Exception("Connection failed")
 
-        with patch(
-            "apple_notes_parser.AppleNotesParser",
-            side_effect=Exception("Database failed")
-        ), patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with (
+            patch(
+                "apple_notes_parser.AppleNotesParser",
+                side_effect=Exception("Database failed"),
+            ),
+            patch("macnotesapp.NotesApp", return_value=mock_notes_app),
+        ):
             result = list_notes()
 
         assert result == []
