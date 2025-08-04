@@ -6,7 +6,6 @@ from typing import Any
 import markdown
 from mcp.server.fastmcp import FastMCP
 
-# Apple notes parser availability check will be done at function level
 
 # Configure logging
 logging.basicConfig(
