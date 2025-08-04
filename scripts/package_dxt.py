@@ -41,7 +41,7 @@ def download_dependencies(lib_dir):
     lib_dir.mkdir(exist_ok=True)
 
     # Dependencies to install
-    dependencies = ["mcp[cli]", "macnotesapp", "markdown"]
+    dependencies = ["mcp[cli]", "macnotesapp", "markdown", "apple-notes-parser"]
 
     print(f"   Installing dependencies: {', '.join(dependencies)}")
     try:

@@ -103,3 +103,33 @@ def sample_note_ids():
         "x-coredata://test/ICNote/p2",
         "x-coredata://test/ICNote/p3",
     ]
+
+
+@pytest.fixture
+def mock_apple_notes_parser():
+    """Mock AppleNotesParser instance"""
+    mock_parser = Mock()
+    return mock_parser
+
+
+@pytest.fixture
+def mock_note_objects():
+    """Mock Note objects for apple-notes-parser"""
+    mock_notes = []
+    
+    # Create mock notes matching the data from mock_noteslist
+    for i, (title, note_id) in enumerate([
+        ("Test Note 1", "x-coredata://test/ICNote/p1"),
+        ("Test Note 2", "x-coredata://test/ICNote/p2"), 
+        ("Meeting Notes", "x-coredata://test/ICNote/p3")
+    ]):
+        mock_note = Mock()
+        mock_note.title = title
+        mock_note.id = note_id
+        mock_note.body = f"<div>This is {title.lower()} content</div>"
+        mock_note.plaintext = f"This is {title.lower()} content"
+        mock_note.creation_date = datetime(2025, 1, i+1, 10, 0, 0)
+        mock_note.modification_date = datetime(2025, 1, i+1, 10, 30, 0)
+        mock_notes.append(mock_note)
+    
+    return mock_notes
