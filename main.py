@@ -72,7 +72,10 @@ def list_notes(limit: int = 50) -> list[dict[str, str]]:
                 logger.warning(f"Error processing individual note: {note_error}")
                 note_data.append({"title": "Error reading note", "id": "error"})
 
-        logger.info(f"Successfully returned {len(note_data)} notes with titles and IDs using apple-notes-parser")
+        logger.info(
+            f"Successfully returned {len(note_data)} notes with titles and IDs "
+            f"using apple-notes-parser"
+        )
         return note_data
 
     except Exception as e:
@@ -80,7 +83,7 @@ def list_notes(limit: int = 50) -> list[dict[str, str]]:
         # Fall back to macnotesapp implementation
         pass
 
-    # Fallback to macnotesapp implementation  
+    # Fallback to macnotesapp implementation
     try:
         from macnotesapp import NotesApp
 
@@ -113,11 +116,15 @@ def list_notes(limit: int = 50) -> list[dict[str, str]]:
                 note_data.append({"title": "Error reading note", "id": "error"})
 
         # Return the array of title/ID pairs
-        logger.info(f"Successfully returned {len(note_data)} notes with titles and IDs using macnotesapp fallback")
+        logger.info(
+            f"Successfully returned {len(note_data)} notes with titles and IDs "
+            f"using macnotesapp fallback"
+        )
         return note_data
 
     except ImportError as import_error:
-        # Check if the error is specifically for macnotesapp to maintain test compatibility
+        # Check if the error is specifically for macnotesapp to maintain test
+        # compatibility
         if "macnotesapp" in str(import_error):
             error_msg = (
                 "macnotesapp package not available. "
@@ -126,7 +133,8 @@ def list_notes(limit: int = 50) -> list[dict[str, str]]:
         else:
             error_msg = (
                 "Both apple-notes-parser and macnotesapp packages not available. "
-                "Please install at least one with: pip install apple-notes-parser OR pip install macnotesapp"
+                "Please install at least one with: pip install apple-notes-parser "
+                "OR pip install macnotesapp"
             )
         logger.error(error_msg)
         return []
@@ -381,7 +389,9 @@ def search_notes(
                 formatted_notes.append({"title": "Error reading note", "id": "error"})
 
         # Use original search_type for compatibility with tests, except for tag search
-        return_search_type = "body" if actual_search_type == "tag" else actual_search_type
+        return_search_type = (
+            "body" if actual_search_type == "tag" else actual_search_type
+        )
 
         result = {
             "notes": formatted_notes,
@@ -394,7 +404,10 @@ def search_notes(
             ),
         }
 
-        logger.info(f"Search completed: {len(formatted_notes)} results for '{query}' using apple-notes-parser")
+        logger.info(
+            f"Search completed: {len(formatted_notes)} results for '{query}' "
+            f"using apple-notes-parser"
+        )
         return result
 
     except Exception as e:
@@ -447,7 +460,8 @@ def search_notes(
             }
 
         logger.info(
-            f"Search completed: found {len(matching_notes)} matches using built-in {search_type} search"
+            f"Search completed: found {len(matching_notes)} matches using "
+            f"built-in {search_type} search"
         )
 
         result = {
@@ -455,14 +469,20 @@ def search_notes(
             "found_count": len(matching_notes),
             "query": query,
             "search_type": search_type,
-            "message": f"Found {len(matching_notes)} notes matching '{query}' in {search_type}",
+            "message": (
+                f"Found {len(matching_notes)} notes matching '{query}' in {search_type}"
+            ),
         }
 
-        logger.info(f"Search completed: {len(matching_notes)} results for '{query}' using macnotesapp fallback")
+        logger.info(
+            f"Search completed: {len(matching_notes)} results for '{query}' "
+            f"using macnotesapp fallback"
+        )
         return result
 
     except ImportError as import_error:
-        # Check if the error is specifically for macnotesapp to maintain test compatibility
+        # Check if the error is specifically for macnotesapp to maintain test
+        # compatibility
         if "macnotesapp" in str(import_error):
             error_msg = (
                 "macnotesapp package not available. "
@@ -471,7 +491,8 @@ def search_notes(
         else:
             error_msg = (
                 "Both apple-notes-parser and macnotesapp packages not available. "
-                "Please install at least one with: pip install apple-notes-parser OR pip install macnotesapp"
+                "Please install at least one with: pip install apple-notes-parser "
+                "OR pip install macnotesapp"
             )
         logger.error(error_msg)
         return {
