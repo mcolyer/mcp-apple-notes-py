@@ -35,7 +35,7 @@
     },
     {
       "name": "search_notes",
-      "description": "Search notes by body content, note titles, or hashtags (use #tag syntax for tag search)"
+      "description": "Search notes by body content or hashtags (use #tag syntax for tag search)"
     },
     {
       "name": "create_note",

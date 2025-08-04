@@ -18,7 +18,7 @@ class TestSearchNotes:
         mock_parser.search_notes.return_value = mock_note_objects
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("hashtag", limit=10, search_type="body")
+            result = search_notes("hashtag", limit=10)
 
         # Verify the result structure
         assert "notes" in result
@@ -38,24 +38,19 @@ class TestSearchNotes:
         # Verify AppleNotesParser was called with correct parameters
         mock_parser.search_notes.assert_called_once_with("hashtag")
 
-    def test_search_notes_name_search(
+    def test_search_notes_body_content(
         self, mock_notes_app, mock_noteslist, mock_note_objects
     ):
-        """Test name/title search"""
-        # Filter mock notes to only those with "Meeting" in title
-        # meeting_notes = [
-        #     note for note in mock_note_objects if "Meeting" in note.title
-        # ]
-
+        """Test body content search"""
         mock_parser = Mock()
-        mock_parser.notes = mock_note_objects
+        mock_parser.search_notes.return_value = mock_note_objects[:1]
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("Meeting", search_type="name")
+            result = search_notes("Meeting")
 
-        assert result["search_type"] == "name"
-        # Should find at least one note with "Meeting" in title
-        assert result["found_count"] >= 1
+        assert result["search_type"] == "body"
+        assert result["found_count"] == 1
+        mock_parser.search_notes.assert_called_once_with("Meeting")
 
     def test_search_notes_with_limit(
         self, mock_notes_app, mock_noteslist, mock_note_objects
@@ -65,7 +60,7 @@ class TestSearchNotes:
         mock_parser.search_notes.return_value = mock_note_objects
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("test", limit=2, search_type="body")
+            result = search_notes("test", limit=2)
 
         assert result["found_count"] == 2
         assert len(result["notes"]) == 2
@@ -78,14 +73,14 @@ class TestSearchNotes:
         mock_parser.get_notes_by_tag.return_value = mock_note_objects
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("#work", search_type="body")
+            result = search_notes("#work")
 
         assert result["query"] == "#work"
         mock_parser.get_notes_by_tag.assert_called_once_with("work")
 
     def test_search_notes_empty_query(self, mock_notes_app):
         """Test search with empty query"""
-        result = search_notes("", search_type="body")
+        result = search_notes("")
 
         assert result["found_count"] == 0
         assert result["notes"] == []
@@ -94,7 +89,7 @@ class TestSearchNotes:
 
     def test_search_notes_whitespace_query(self, mock_notes_app):
         """Test search with whitespace-only query"""
-        result = search_notes("   ", search_type="body")
+        result = search_notes("   ")
 
         assert result["found_count"] == 0
         assert result["search_type"] == "empty"
@@ -115,27 +110,13 @@ class TestSearchNotes:
             result = search_notes("test", limit=200)
             assert len(result["notes"]) == 3  # Limited by available notes
 
-    def test_search_notes_invalid_search_type(
-        self, mock_notes_app, mock_noteslist, mock_note_objects
-    ):
-        """Test with invalid search_type parameter"""
-        mock_parser = Mock()
-        mock_parser.search_notes.return_value = mock_note_objects
-
-        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("test", search_type="invalid")
-
-        # Should default to "body"
-        assert result["search_type"] == "body"
-        mock_parser.search_notes.assert_called_once_with("test")
-
     def test_search_notes_no_results(self, mock_notes_app):
         """Test search with no matching results"""
         mock_parser = Mock()
         mock_parser.search_notes.return_value = []
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("nonexistent", search_type="body")
+            result = search_notes("nonexistent")
 
         assert result["found_count"] == 0
         assert result["notes"] == []
@@ -147,7 +128,7 @@ class TestSearchNotes:
             "apple_notes_parser.AppleNotesParser",
             side_effect=ImportError("apple-notes-parser not available")
         ):
-            result = search_notes("test", search_type="body")
+            result = search_notes("test")
 
         assert result["found_count"] == 0
         assert result["notes"] == []
@@ -159,7 +140,7 @@ class TestSearchNotes:
             "apple_notes_parser.AppleNotesParser",
             side_effect=Exception("Database failed")
         ):
-            result = search_notes("test", search_type="body")
+            result = search_notes("test")
 
         assert result["found_count"] == 0
         assert result["notes"] == []
@@ -179,7 +160,7 @@ class TestSearchNotes:
         mock_parser.search_notes.return_value = [mock_note1, mock_note2]
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("test", search_type="body")
+            result = search_notes("test")
 
         assert result["found_count"] == 2
         assert (
@@ -195,9 +176,9 @@ class TestSearchNotes:
         mock_parser.search_notes.return_value = mock_note_objects
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
-            result = search_notes("test")  # No limit or search_type specified
+            result = search_notes("test")  # No limit specified
 
-        # Should use defaults: limit=10, search_type="body"
+        # Should use defaults: limit=10
         assert result["search_type"] == "body"
         assert len(result["notes"]) <= 10  # Should respect default limit
         mock_parser.search_notes.assert_called_once_with("test")

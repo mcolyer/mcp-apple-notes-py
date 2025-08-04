@@ -6,7 +6,6 @@ from typing import Any
 import markdown
 from mcp.server.fastmcp import FastMCP
 
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -271,17 +270,13 @@ def get_notes(ids: list[str]) -> dict[str, Any]:
 
 
 @mcp.tool()
-def search_notes(
-    query: str, limit: int = 10, search_type: str = "body"
-) -> dict[str, Any]:
+def search_notes(query: str, limit: int = 10) -> dict[str, Any]:
     """
-    Search notes by body content, note titles, or hashtags
+    Search notes by body content or hashtags
 
     Args:
         query: Search term or tag (use #tag format for tag search)
         limit: Maximum number of results to return (default: 10, max: 100)
-        search_type: Where to search - "body" for note content, "name" for titles
-            (default: "body")
 
     Returns:
         Dictionary containing matching notes with titles and IDs
@@ -304,14 +299,8 @@ def search_notes(
         elif limit > 100:
             limit = 100
 
-        # Validate search_type parameter
-        if search_type not in ["body", "name"]:
-            search_type = "body"
-
         search_query = query.strip()
-        logger.info(
-            f"Searching notes for: '{search_query}' in {search_type} (limit: {limit})"
-        )
+        logger.info(f"Searching notes for: '{search_query}' (limit: {limit})")
 
         parser = AppleNotesParser()
         parser.load_data()
@@ -321,22 +310,11 @@ def search_notes(
             # Use built-in tag search
             tag_name = search_query[1:]  # Remove # prefix
             matching_notes = parser.get_notes_by_tag(tag_name)
-            actual_search_type = "tag"
             logger.debug(f"Tag search executed for: #{tag_name}")
-        elif search_type == "body":
+        else:
             # Use full-text search
             matching_notes = parser.search_notes(search_query)
-            actual_search_type = "body"
             logger.debug(f"Body search executed for: {search_query}")
-        else:  # search_type == "name"
-            # Filter by title client-side
-            all_notes = parser.notes
-            matching_notes = [
-                note for note in all_notes
-                if search_query.lower() in (note.title or "").lower()
-            ]
-            actual_search_type = "name"
-            logger.debug(f"Name search executed for: {search_query}")
 
         logger.debug(f"Found {len(matching_notes)} notes matching search")
 
@@ -352,10 +330,8 @@ def search_notes(
                 logger.warning(f"Error processing search result note: {note_error}")
                 formatted_notes.append({"title": "Error reading note", "id": "error"})
 
-        # Use original search_type for compatibility with tests, except for tag search
-        return_search_type = (
-            "body" if actual_search_type == "tag" else actual_search_type
-        )
+        # Use body for compatibility with tests, even for tag search
+        return_search_type = "body"
 
         result = {
             "notes": formatted_notes,
@@ -363,8 +339,7 @@ def search_notes(
             "query": query,
             "search_type": return_search_type,
             "message": (
-                f"Found {len(formatted_notes)} notes matching '{query}' "
-                f"in {actual_search_type}"
+                f"Found {len(formatted_notes)} notes matching '{query}'"
             ),
         }
 
