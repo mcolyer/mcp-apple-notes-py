@@ -10,11 +10,13 @@ from main import list_notes
 class TestListNotes:
     """Test cases for list_notes function"""
 
-    def test_list_notes_success(self, mock_notes_app, mock_noteslist, mock_note_objects):
+    def test_list_notes_success(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test successful note listing"""
         mock_parser = Mock()
         mock_parser.notes = mock_note_objects[:3]  # Limit to 3 notes
-        
+
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes(limit=3)
 
@@ -36,7 +38,9 @@ class TestListNotes:
         # Verify AppleNotesParser was called correctly
         mock_parser.load_data.assert_called_once()
 
-    def test_list_notes_with_limit(self, mock_notes_app, mock_noteslist, mock_note_objects):
+    def test_list_notes_with_limit(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test note listing with custom limit"""
         mock_parser = Mock()
         mock_parser.notes = mock_note_objects
@@ -59,7 +63,9 @@ class TestListNotes:
 
         assert result == []
 
-    def test_list_notes_limit_validation(self, mock_notes_app, mock_noteslist, mock_note_objects):
+    def test_list_notes_limit_validation(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test limit parameter validation"""
         mock_parser = Mock()
         mock_parser.notes = mock_note_objects
@@ -97,7 +103,8 @@ class TestListNotes:
     def test_list_notes_import_error(self):
         """Test handling of import error"""
         with patch(
-            "apple_notes_parser.AppleNotesParser", side_effect=ImportError("apple-notes-parser not available")
+            "apple_notes_parser.AppleNotesParser",
+            side_effect=ImportError("apple-notes-parser not available")
         ), patch(
             "macnotesapp.NotesApp", side_effect=ImportError("macnotesapp not available")
         ):
@@ -110,7 +117,8 @@ class TestListNotes:
         mock_notes_app.noteslist.side_effect = Exception("Connection failed")
 
         with patch(
-            "apple_notes_parser.AppleNotesParser", side_effect=Exception("Database failed")
+            "apple_notes_parser.AppleNotesParser",
+            side_effect=Exception("Database failed")
         ), patch("macnotesapp.NotesApp", return_value=mock_notes_app):
             result = list_notes()
 
@@ -122,9 +130,11 @@ class TestListNotes:
         mock_note1 = Mock()
         mock_note1.title = "Good Note"
         mock_note1.id = "id1"
-        
+
         mock_note2 = Mock()
-        mock_note2.title = Mock(side_effect=Exception("Note error"))  # This will cause an error
+        mock_note2.title = Mock(
+            side_effect=Exception("Note error")
+        )  # This will cause an error
         mock_note2.id = "id2"
 
         mock_parser = Mock()
