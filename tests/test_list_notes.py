@@ -146,3 +146,76 @@ class TestListNotes:
         # Should handle the error gracefully and return what it can
         assert len(result) >= 1
         assert result[0]["title"] == "Good Note"
+
+    def test_list_notes_with_folder_filter(self, mock_notes_app, mock_note_objects):
+        """Test note listing with folder filtering"""
+        # Create mock notes with folder attributes
+        mock_note1 = Mock()
+        mock_note1.title = "Work Note"
+        mock_note1.id = "id1"
+        mock_note1.folder_name = "Work"
+        mock_note1.folder = Mock()
+        mock_note1.folder.name = "Work"
+
+        mock_note2 = Mock()
+        mock_note2.title = "Personal Note"
+        mock_note2.id = "id2"
+        mock_note2.folder_name = "Personal"
+        mock_note2.folder = Mock()
+        mock_note2.folder.name = "Personal"
+
+        mock_note3 = Mock()
+        mock_note3.title = "Another Work Note"
+        mock_note3.id = "id3"
+        mock_note3.folder_name = "Work Projects"
+        mock_note3.folder = Mock()
+        mock_note3.folder.name = "Work Projects"
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note1, mock_note2, mock_note3]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="work")
+
+        # Should only return notes with "work" in folder name (case-insensitive)
+        assert len(result) == 2
+        assert result[0]["title"] == "Work Note"
+        assert result[1]["title"] == "Another Work Note"
+
+    def test_list_notes_folder_filter_no_matches(
+        self, mock_notes_app, mock_note_objects
+    ):
+        """Test folder filtering with no matching notes"""
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects  # Default notes without folder filtering
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="nonexistent")
+
+        # Should return empty list when no notes match folder
+        assert result == []
+
+    def test_list_notes_folder_filter_error_handling(self, mock_notes_app):
+        """Test folder filtering with error in folder attribute access"""
+        # Create a note that will cause an error when accessing folder
+        mock_note1 = Mock()
+        mock_note1.title = "Good Note"
+        mock_note1.id = "id1"
+        mock_note1.folder_name = "Work"
+
+        mock_note2 = Mock()
+        mock_note2.title = "Error Note"
+        mock_note2.id = "id2"
+        # This note will cause an error when accessing folder_name
+        mock_note2.folder_name = Mock(side_effect=Exception("Folder error"))
+        mock_note2.folder = Mock(side_effect=Exception("Folder error"))
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note1, mock_note2]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="work")
+
+        # Should continue processing despite error and return the good note
+        assert len(result) == 1
+        assert result[0]["title"] == "Good Note"

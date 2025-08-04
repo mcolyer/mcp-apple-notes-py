@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_TOOL_ARGS\" | grep -q \"git commit\"; then cd $CLAUDE_PROJECT_DIR && uv run ruff check --diff . && echo \"✅ Linting passed\" || (echo \"❌ Linting failed - fix errors before committing\" && exit 1); fi"
+            "command": "if echo \"$CLAUDE_TOOL_ARGS\" | grep -q \"git commit\"; then cd $CLAUDE_PROJECT_DIR && uv run ruff check --fix . && uv run ruff format . && echo \"✅ Linting and formatting passed\" || (echo \"❌ Linting/formatting failed - fix errors before committing\" && exit 1); fi"
           }
         ]
       }

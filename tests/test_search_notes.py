@@ -85,21 +85,16 @@ class TestSearchNotes:
 
     def test_search_notes_empty_query(self, mock_notes_app):
         """Test search with empty query"""
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
-            result = search_notes("", search_type="body")
+        result = search_notes("", search_type="body")
 
         assert result["found_count"] == 0
         assert result["notes"] == []
         assert result["search_type"] == "empty"
         assert "Empty search query" in result["message"]
 
-        # Should not call noteslist for empty query
-        mock_notes_app.noteslist.assert_not_called()
-
     def test_search_notes_whitespace_query(self, mock_notes_app):
         """Test search with whitespace-only query"""
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
-            result = search_notes("   ", search_type="body")
+        result = search_notes("   ", search_type="body")
 
         assert result["found_count"] == 0
         assert result["search_type"] == "empty"
@@ -151,8 +146,6 @@ class TestSearchNotes:
         with patch(
             "apple_notes_parser.AppleNotesParser",
             side_effect=ImportError("apple-notes-parser not available")
-        ), patch(
-            "macnotesapp.NotesApp", side_effect=ImportError("macnotesapp not available")
         ):
             result = search_notes("test", search_type="body")
 
@@ -162,12 +155,10 @@ class TestSearchNotes:
 
     def test_search_notes_general_exception(self, mock_notes_app):
         """Test handling of general exceptions during search"""
-        mock_notes_app.noteslist.side_effect = Exception("Search failed")
-
         with patch(
             "apple_notes_parser.AppleNotesParser",
             side_effect=Exception("Database failed")
-        ), patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        ):
             result = search_notes("test", search_type="body")
 
         assert result["found_count"] == 0

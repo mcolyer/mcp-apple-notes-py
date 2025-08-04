@@ -4,7 +4,7 @@
   "display_name": "Apple Notes MCP",
   "version": "0.2.2",
   "description": "Access, search, and manage notes from Apple Notes.app via MCP with tag support",
-  "long_description": "This Desktop Extension provides enhanced access to Apple Notes through the Model Context Protocol (MCP). It allows AI assistants to list, search (including hashtag search), and retrieve notes from your local Apple Notes.app with improved performance through direct database access. Features include full-text search, tag-based filtering with #hashtag syntax, and seamless integration of your note-taking workflow with AI interactions.",
+  "long_description": "This Desktop Extension provides enhanced access to Apple Notes through the Model Context Protocol (MCP). It allows AI assistants to list, search (including hashtag search), and retrieve notes from your local Apple Notes.app with improved performance through direct database access. Features include full-text search, tag-based filtering with #hashtag syntax, folder-based filtering, and seamless integration of your note-taking workflow with AI interactions.",
   "author": {
     "name": "User",
     "email": "user@example.com"
@@ -27,7 +27,7 @@
   "tools": [
     {
       "name": "list_notes",
-      "description": "List note titles and IDs from Apple Notes.app"
+      "description": "List note titles and IDs from Apple Notes.app with optional folder filtering"
     },
     {
       "name": "get_notes",

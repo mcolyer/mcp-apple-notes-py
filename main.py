@@ -27,37 +27,59 @@ if DEBUG_MODE:
 
 
 @mcp.tool()
-def list_notes(limit: int = 50) -> list[dict[str, str]]:
+def list_notes(limit: int = 50, folder: str = None) -> list[dict[str, str]]:
     """
     List all accessible notes from Apple Notes.app
 
     Args:
         limit: Maximum number of notes to return (default: 50, max: 1000)
+        folder: Optional folder name to filter notes (case-insensitive)
 
     Returns:
         List of dictionaries with note titles and IDs
     """
-    # Validate limit parameter
-    if limit < 1:
-        limit = 1
-    elif limit > 1000:
-        limit = 1000
-
-    logger.info(f"Fetching up to {limit} notes from Apple Notes")
-
-    # Try apple-notes-parser first for better performance
     try:
         from apple_notes_parser import AppleNotesParser
+
+        # Validate limit parameter
+        if limit < 1:
+            limit = 1
+        elif limit > 1000:
+            limit = 1000
+
+        folder_msg = f" from folder '{folder}'" if folder else ""
+        logger.info(f"Fetching up to {limit} notes{folder_msg} from Apple Notes")
 
         parser = AppleNotesParser()
         parser.load_data()
 
-        # Get all notes and apply limit
+        # Get all notes
         all_notes = parser.notes
+
+        # Filter by folder if specified
+        if folder:
+            filtered_notes = []
+            for note in all_notes:
+                try:
+                    # Get folder name from note
+                    note_folder = getattr(note, 'folder_name', None)
+                    if not note_folder and hasattr(note, 'folder'):
+                        note_folder = getattr(note.folder, 'name', None)
+
+                    # Case-insensitive folder matching
+                    if note_folder and folder.lower() in note_folder.lower():
+                        filtered_notes.append(note)
+                except Exception as folder_error:
+                    logger.debug(f"Error checking folder for note: {folder_error}")
+                    continue
+            all_notes = filtered_notes
+
+        # Apply limit
         limited_notes = all_notes[:limit]
 
         if not limited_notes:
-            logger.info("No notes found in Apple Notes")
+            no_notes_msg = f"No notes found{folder_msg} in Apple Notes"
+            logger.info(no_notes_msg)
             return []
 
         # Map to current return format
@@ -72,70 +94,14 @@ def list_notes(limit: int = 50) -> list[dict[str, str]]:
                 logger.warning(f"Error processing individual note: {note_error}")
                 note_data.append({"title": "Error reading note", "id": "error"})
 
-        logger.info(
-            f"Successfully returned {len(note_data)} notes with titles and IDs "
-            f"using apple-notes-parser"
-        )
+        logger.info(f"Successfully returned {len(note_data)} notes with titles and IDs")
         return note_data
 
-    except Exception as e:
-        logger.warning(f"apple-notes-parser failed: {e}, falling back to macnotesapp")
-        # Fall back to macnotesapp implementation
-        pass
-
-    # Fallback to macnotesapp implementation
-    try:
-        from macnotesapp import NotesApp
-
-        # Initialize Notes app connection
-        notes_app = NotesApp()
-
-        # Use noteslist to get all notes efficiently
-        noteslist_obj = notes_app.noteslist()
-
-        if len(noteslist_obj) == 0:
-            logger.info("No notes found in Apple Notes")
-            return []
-
-        # Extract note names and IDs from noteslist
-        note_names = noteslist_obj.name
-        note_ids = noteslist_obj.id
-
-        # Create note data with limit
-        note_data = []
-        for i, (name, note_id) in enumerate(zip(note_names, note_ids, strict=False)):
-            if i >= limit:
-                break
-            try:
-                title = name or "Untitled"
-                note_data.append({"title": title, "id": note_id or "unknown"})
-                logger.debug(f"Added note: {title} (ID: {note_id})")
-
-            except Exception as note_error:
-                logger.warning(f"Error processing individual note: {note_error}")
-                note_data.append({"title": "Error reading note", "id": "error"})
-
-        # Return the array of title/ID pairs
-        logger.info(
-            f"Successfully returned {len(note_data)} notes with titles and IDs "
-            f"using macnotesapp fallback"
+    except ImportError:
+        error_msg = (
+            "apple-notes-parser package not available. "
+            "Please install it with: pip install apple-notes-parser"
         )
-        return note_data
-
-    except ImportError as import_error:
-        # Check if the error is specifically for macnotesapp to maintain test
-        # compatibility
-        if "macnotesapp" in str(import_error):
-            error_msg = (
-                "macnotesapp package not available. "
-                "Please install it with: pip install macnotesapp"
-            )
-        else:
-            error_msg = (
-                "Both apple-notes-parser and macnotesapp packages not available. "
-                "Please install at least one with: pip install apple-notes-parser "
-                "OR pip install macnotesapp"
-            )
         logger.error(error_msg)
         return []
 
@@ -321,33 +287,32 @@ def search_notes(
     Returns:
         Dictionary containing matching notes with titles and IDs
     """
-    if not query.strip():
-        return {
-            "notes": [],
-            "found_count": 0,
-            "query": query,
-            "search_type": "empty",
-            "message": "Empty search query provided",
-        }
-
-    # Validate limit parameter
-    if limit < 1:
-        limit = 1
-    elif limit > 100:
-        limit = 100
-
-    # Validate search_type parameter
-    if search_type not in ["body", "name"]:
-        search_type = "body"
-
-    search_query = query.strip()
-    logger.info(
-        f"Searching notes for: '{search_query}' in {search_type} (limit: {limit})"
-    )
-
-    # Try apple-notes-parser first for enhanced functionality
     try:
         from apple_notes_parser import AppleNotesParser
+
+        if not query.strip():
+            return {
+                "notes": [],
+                "found_count": 0,
+                "query": query,
+                "search_type": "empty",
+                "message": "Empty search query provided",
+            }
+
+        # Validate limit parameter
+        if limit < 1:
+            limit = 1
+        elif limit > 100:
+            limit = 100
+
+        # Validate search_type parameter
+        if search_type not in ["body", "name"]:
+            search_type = "body"
+
+        search_query = query.strip()
+        logger.info(
+            f"Searching notes for: '{search_query}' in {search_type} (limit: {limit})"
+        )
 
         parser = AppleNotesParser()
         parser.load_data()
@@ -404,96 +369,14 @@ def search_notes(
             ),
         }
 
-        logger.info(
-            f"Search completed: {len(formatted_notes)} results for '{query}' "
-            f"using apple-notes-parser"
-        )
+        logger.info(f"Search completed: {len(formatted_notes)} results for '{query}'")
         return result
 
-    except Exception as e:
-        logger.warning(f"apple-notes-parser failed: {e}, falling back to macnotesapp")
-        # Fall back to macnotesapp implementation
-        pass
-
-    # Fallback to macnotesapp implementation
-    try:
-        from macnotesapp import NotesApp
-
-        notes_app = NotesApp()
-
-        # Use noteslist with proper parameter handling (pass as list)
-        try:
-            if search_type == "name":
-                noteslist_obj = notes_app.noteslist(name=[search_query])
-                logger.debug(f"Built-in name search executed for: {search_query}")
-            else:  # search_type == "body"
-                noteslist_obj = notes_app.noteslist(body=[search_query])
-                logger.debug(f"Built-in body search executed for: {search_query}")
-
-            logger.debug(f"Found {len(noteslist_obj)} notes matching search")
-
-            # Get note names and IDs from noteslist
-            note_names = noteslist_obj.name
-            note_ids = noteslist_obj.id
-
-            # Create matching notes list with limit
-            matching_notes = []
-            for i, (name, note_id) in enumerate(
-                zip(note_names, note_ids, strict=False)
-            ):
-                if i >= limit:
-                    break
-                matching_notes.append(
-                    {"title": name or "Untitled", "id": note_id or "unknown"}
-                )
-
-        except Exception as search_error:
-            logger.error(f"Error with noteslist search: {search_error}")
-            # Return error response
-            return {
-                "notes": [],
-                "found_count": 0,
-                "query": query,
-                "search_type": "error",
-                "error": f"Error with noteslist search: {search_error}",
-                "message": "Failed to search notes",
-            }
-
-        logger.info(
-            f"Search completed: found {len(matching_notes)} matches using "
-            f"built-in {search_type} search"
+    except ImportError:
+        error_msg = (
+            "apple-notes-parser package not available. "
+            "Please install it with: pip install apple-notes-parser"
         )
-
-        result = {
-            "notes": matching_notes,
-            "found_count": len(matching_notes),
-            "query": query,
-            "search_type": search_type,
-            "message": (
-                f"Found {len(matching_notes)} notes matching '{query}' in {search_type}"
-            ),
-        }
-
-        logger.info(
-            f"Search completed: {len(matching_notes)} results for '{query}' "
-            f"using macnotesapp fallback"
-        )
-        return result
-
-    except ImportError as import_error:
-        # Check if the error is specifically for macnotesapp to maintain test
-        # compatibility
-        if "macnotesapp" in str(import_error):
-            error_msg = (
-                "macnotesapp package not available. "
-                "Please install it with: pip install macnotesapp"
-            )
-        else:
-            error_msg = (
-                "Both apple-notes-parser and macnotesapp packages not available. "
-                "Please install at least one with: pip install apple-notes-parser "
-                "OR pip install macnotesapp"
-            )
         logger.error(error_msg)
         return {
             "notes": [],
