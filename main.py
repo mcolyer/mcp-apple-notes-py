@@ -275,7 +275,8 @@ def search_notes(query: str, limit: int = 10) -> dict[str, Any]:
     Search notes by body content or hashtags
 
     Args:
-        query: Search term or tag (use #tag format for tag search)
+        query: Search term for body content, or hashtag starting with # for tag search
+               (e.g., "#work" to find notes tagged with "work" - one tag at a time)
         limit: Maximum number of results to return (default: 10, max: 100)
 
     Returns:
