@@ -211,9 +211,9 @@ class TestSearchNotes:
     ):
         """Test that integer IDs are converted to strings in hashtag search"""
         mock_parser = Mock()
-        mock_parser.get_notes_by_tag.return_value = (
-            mock_note_objects_with_integer_ids[:1]
-        )
+        mock_parser.get_notes_by_tag.return_value = mock_note_objects_with_integer_ids[
+            :1
+        ]
 
         with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = search_notes("#work")
