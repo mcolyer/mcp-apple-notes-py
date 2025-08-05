@@ -10,11 +10,14 @@ from main import list_notes
 class TestListNotes:
     """Test cases for list_notes function"""
 
-    def test_list_notes_success(self, mock_notes_app, mock_noteslist):
+    def test_list_notes_success(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test successful note listing"""
-        mock_notes_app.noteslist.return_value = mock_noteslist
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects[:3]  # Limit to 3 notes
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes(limit=3)
 
         # Verify the result
@@ -32,14 +35,17 @@ class TestListNotes:
             "id": "x-coredata://test/ICNote/p3",
         }
 
-        # Verify NotesApp was called correctly
-        mock_notes_app.noteslist.assert_called_once_with()
+        # Verify AppleNotesParser was called correctly
+        mock_parser.load_data.assert_called_once()
 
-    def test_list_notes_with_limit(self, mock_notes_app, mock_noteslist):
+    def test_list_notes_with_limit(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test note listing with custom limit"""
-        mock_notes_app.noteslist.return_value = mock_noteslist
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes(limit=2)
 
         # Should only return 2 notes even though 3 are available
@@ -49,23 +55,22 @@ class TestListNotes:
 
     def test_list_notes_empty_result(self, mock_notes_app):
         """Test when no notes are found"""
-        mock_empty_noteslist = Mock()
-        mock_empty_noteslist.name = []
-        mock_empty_noteslist.id = []
-        mock_empty_noteslist.__len__ = Mock(return_value=0)
+        mock_parser = Mock()
+        mock_parser.notes = []
 
-        mock_notes_app.noteslist.return_value = mock_empty_noteslist
-
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes()
 
         assert result == []
 
-    def test_list_notes_limit_validation(self, mock_notes_app, mock_noteslist):
+    def test_list_notes_limit_validation(
+        self, mock_notes_app, mock_noteslist, mock_note_objects
+    ):
         """Test limit parameter validation"""
-        mock_notes_app.noteslist.return_value = mock_noteslist
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             # Test minimum limit
             result = list_notes(limit=0)
             assert len(result) == 1  # Should be corrected to 1
@@ -76,14 +81,18 @@ class TestListNotes:
 
     def test_list_notes_with_none_names(self, mock_notes_app):
         """Test handling of notes with None names"""
-        mock_noteslist_with_none = Mock()
-        mock_noteslist_with_none.name = [None, "Valid Note", ""]
-        mock_noteslist_with_none.id = ["id1", "id2", "id3"]
-        mock_noteslist_with_none.__len__ = Mock(return_value=3)
+        # Create mock notes with None and empty titles
+        mock_notes = []
+        for i, title in enumerate([None, "Valid Note", ""]):
+            mock_note = Mock()
+            mock_note.title = title
+            mock_note.id = f"id{i + 1}"
+            mock_notes.append(mock_note)
 
-        mock_notes_app.noteslist.return_value = mock_noteslist_with_none
+        mock_parser = Mock()
+        mock_parser.notes = mock_notes
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes(limit=3)
 
         assert len(result) == 3
@@ -93,8 +102,15 @@ class TestListNotes:
 
     def test_list_notes_import_error(self):
         """Test handling of import error"""
-        with patch(
-            "macnotesapp.NotesApp", side_effect=ImportError("macnotesapp not available")
+        with (
+            patch(
+                "apple_notes_parser.AppleNotesParser",
+                side_effect=ImportError("apple-notes-parser not available"),
+            ),
+            patch(
+                "macnotesapp.NotesApp",
+                side_effect=ImportError("macnotesapp not available"),
+            ),
         ):
             result = list_notes()
 
@@ -104,26 +120,151 @@ class TestListNotes:
         """Test handling of general exceptions"""
         mock_notes_app.noteslist.side_effect = Exception("Connection failed")
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        with (
+            patch(
+                "apple_notes_parser.AppleNotesParser",
+                side_effect=Exception("Database failed"),
+            ),
+            patch("macnotesapp.NotesApp", return_value=mock_notes_app),
+        ):
             result = list_notes()
 
         assert result == []
 
     def test_list_notes_individual_note_error(self, mock_notes_app):
         """Test handling of individual note processing errors"""
-        mock_noteslist_with_error = Mock()
-        mock_noteslist_with_error.name = [
-            "Good Note",
-            None,
-        ]  # Second will cause error in zip
-        mock_noteslist_with_error.id = ["id1"]  # Mismatched lengths
-        mock_noteslist_with_error.__len__ = Mock(return_value=2)
+        # Create mock notes where one will cause an error
+        mock_note1 = Mock()
+        mock_note1.title = "Good Note"
+        mock_note1.id = "id1"
 
-        mock_notes_app.noteslist.return_value = mock_noteslist_with_error
+        mock_note2 = Mock()
+        mock_note2.title = Mock(
+            side_effect=Exception("Note error")
+        )  # This will cause an error
+        mock_note2.id = "id2"
 
-        with patch("macnotesapp.NotesApp", return_value=mock_notes_app):
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note1, mock_note2]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
             result = list_notes(limit=2)
 
         # Should handle the error gracefully and return what it can
         assert len(result) >= 1
         assert result[0]["title"] == "Good Note"
+
+    def test_list_notes_with_folder_filter(self, mock_notes_app, mock_note_objects):
+        """Test note listing with folder filtering"""
+        # Create mock notes with folder attributes
+        mock_note1 = Mock()
+        mock_note1.title = "Work Note"
+        mock_note1.id = "id1"
+        mock_note1.folder_name = "Work"
+        mock_note1.folder = Mock()
+        mock_note1.folder.name = "Work"
+
+        mock_note2 = Mock()
+        mock_note2.title = "Personal Note"
+        mock_note2.id = "id2"
+        mock_note2.folder_name = "Personal"
+        mock_note2.folder = Mock()
+        mock_note2.folder.name = "Personal"
+
+        mock_note3 = Mock()
+        mock_note3.title = "Another Work Note"
+        mock_note3.id = "id3"
+        mock_note3.folder_name = "Work Projects"
+        mock_note3.folder = Mock()
+        mock_note3.folder.name = "Work Projects"
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note1, mock_note2, mock_note3]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="work")
+
+        # Should only return notes with "work" in folder name (case-insensitive)
+        assert len(result) == 2
+        assert result[0]["title"] == "Work Note"
+        assert result[1]["title"] == "Another Work Note"
+
+    def test_list_notes_folder_filter_no_matches(
+        self, mock_notes_app, mock_note_objects
+    ):
+        """Test folder filtering with no matching notes"""
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects  # Default notes without folder filtering
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="nonexistent")
+
+        # Should return empty list when no notes match folder
+        assert result == []
+
+    def test_list_notes_folder_filter_error_handling(self, mock_notes_app):
+        """Test folder filtering with error in folder attribute access"""
+        # Create a note that will cause an error when accessing folder
+        mock_note1 = Mock()
+        mock_note1.title = "Good Note"
+        mock_note1.id = "id1"
+        mock_note1.folder_name = "Work"
+
+        mock_note2 = Mock()
+        mock_note2.title = "Error Note"
+        mock_note2.id = "id2"
+        # This note will cause an error when accessing folder_name
+        mock_note2.folder_name = Mock(side_effect=Exception("Folder error"))
+        mock_note2.folder = Mock(side_effect=Exception("Folder error"))
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note1, mock_note2]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=10, folder="work")
+
+        # Should continue processing despite error and return the good note
+        assert len(result) == 1
+        assert result[0]["title"] == "Good Note"
+
+    def test_list_notes_integer_id_conversion(
+        self, mock_notes_app, mock_note_objects_with_integer_ids
+    ):
+        """Test that integer IDs from apple-notes-parser are converted to strings"""
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects_with_integer_ids
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=3)
+
+        # Verify that all IDs are strings, not integers
+        assert len(result) == 3
+        for note in result:
+            assert isinstance(note["id"], str), (
+                f"ID {note['id']} should be string, got {type(note['id'])}"
+            )
+            assert note["id"].isdigit(), f"ID {note['id']} should be numeric string"
+
+        # Check specific conversions
+        assert result[0]["id"] == "2436"
+        assert result[1]["id"] == "2437"
+        assert result[2]["id"] == "2597"
+
+    def test_list_notes_none_id_handling(self, mock_notes_app):
+        """Test handling of None IDs from apple-notes-parser"""
+        # Create a note with None ID
+        mock_note = Mock()
+        mock_note.title = "Note with None ID"
+        mock_note.id = None
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=1)
+
+        # Should handle None ID gracefully
+        assert len(result) == 1
+        assert result[0]["title"] == "Note with None ID"
+        assert result[0]["id"] == "unknown"
+        assert isinstance(result[0]["id"], str)

@@ -8,7 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Future changes will be documented here
+- **Enhanced Search Performance**: Integrated apple-notes-parser for faster SQLite-based search operations
+- **Tag Search Support**: Added native hashtag search functionality with `#tag` syntax
+- **Folder Filtering**: Added optional folder parameter to list_notes() for filtering notes by folder name
+- **Hybrid Implementation**: Combines apple-notes-parser for search/list operations with macnotesapp for note creation and retrieval
+
+### Changed
+- **list_notes()**: Now uses apple-notes-parser exclusively with optional folder filtering parameter
+- **search_notes()**: Enhanced with tag search support and faster full-text search via apple-notes-parser
+- **Dependencies**: Added apple-notes-parser as new dependency alongside existing macnotesapp
+- **Test Suite**: Updated to 47 tests including new folder filtering functionality
+
+### Removed
+- **Fallback Logic**: Removed macnotesapp fallback from list_notes() and search_notes() for simplified architecture
+
+### Technical
+- Simplified architecture: apple-notes-parser for read operations, macnotesapp for write operations  
+- Case-insensitive folder filtering with error handling for individual note processing
+- All 47 tests pass with enhanced coverage for folder filtering functionality
+- Tag search automatically detected when query starts with "#"
 
 ## [0.2.2] - 2025-07-28
 

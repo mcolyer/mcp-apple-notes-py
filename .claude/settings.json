@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
-        "matcher": "Edit|MultiEdit|Write",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "cd $CLAUDE_PROJECT_DIR && uv run ruff check --diff ."
+            "command": "if echo \"$CLAUDE_TOOL_ARGS\" | grep -q \"git commit\"; then cd $CLAUDE_PROJECT_DIR && uv run ruff check --fix . && uv run ruff format . && echo \"✅ Linting and formatting passed\" || (echo \"❌ Linting/formatting failed - fix errors before committing\" && exit 1); fi"
           }
         ]
       }
