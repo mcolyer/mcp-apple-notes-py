@@ -182,3 +182,63 @@ class TestSearchNotes:
         assert result["search_type"] == "body"
         assert len(result["notes"]) <= 10  # Should respect default limit
         mock_parser.search_notes.assert_called_once_with("test")
+
+    def test_search_notes_integer_id_conversion(
+        self, mock_notes_app, mock_note_objects_with_integer_ids
+    ):
+        """Test that integer IDs from apple-notes-parser are converted to strings"""
+        mock_parser = Mock()
+        mock_parser.search_notes.return_value = mock_note_objects_with_integer_ids
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = search_notes("test", limit=3)
+
+        # Verify that all IDs in search results are strings, not integers
+        assert len(result["notes"]) == 3
+        for note in result["notes"]:
+            assert isinstance(note["id"], str), (
+                f"ID {note['id']} should be string, got {type(note['id'])}"
+            )
+            assert note["id"].isdigit(), f"ID {note['id']} should be numeric string"
+
+        # Check specific conversions
+        assert result["notes"][0]["id"] == "2436"
+        assert result["notes"][1]["id"] == "2437"
+        assert result["notes"][2]["id"] == "2597"
+
+    def test_search_notes_hashtag_integer_id_conversion(
+        self, mock_notes_app, mock_note_objects_with_integer_ids
+    ):
+        """Test that integer IDs are converted to strings in hashtag search"""
+        mock_parser = Mock()
+        mock_parser.get_notes_by_tag.return_value = (
+            mock_note_objects_with_integer_ids[:1]
+        )
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = search_notes("#work")
+
+        # Verify that hashtag search also converts integer IDs to strings
+        assert len(result["notes"]) == 1
+        assert isinstance(result["notes"][0]["id"], str)
+        assert result["notes"][0]["id"] == "2436"
+        mock_parser.get_notes_by_tag.assert_called_once_with("work")
+
+    def test_search_notes_none_id_handling(self, mock_notes_app):
+        """Test handling of None IDs in search results"""
+        # Create a note with None ID
+        mock_note = Mock()
+        mock_note.title = "Search result with None ID"
+        mock_note.id = None
+
+        mock_parser = Mock()
+        mock_parser.search_notes.return_value = [mock_note]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = search_notes("test")
+
+        # Should handle None ID gracefully in search results
+        assert len(result["notes"]) == 1
+        assert result["notes"][0]["title"] == "Search result with None ID"
+        assert result["notes"][0]["id"] == "unknown"
+        assert isinstance(result["notes"][0]["id"], str)

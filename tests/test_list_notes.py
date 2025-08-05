@@ -226,3 +226,45 @@ class TestListNotes:
         # Should continue processing despite error and return the good note
         assert len(result) == 1
         assert result[0]["title"] == "Good Note"
+
+    def test_list_notes_integer_id_conversion(
+        self, mock_notes_app, mock_note_objects_with_integer_ids
+    ):
+        """Test that integer IDs from apple-notes-parser are converted to strings"""
+        mock_parser = Mock()
+        mock_parser.notes = mock_note_objects_with_integer_ids
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=3)
+
+        # Verify that all IDs are strings, not integers
+        assert len(result) == 3
+        for note in result:
+            assert isinstance(note["id"], str), (
+                f"ID {note['id']} should be string, got {type(note['id'])}"
+            )
+            assert note["id"].isdigit(), f"ID {note['id']} should be numeric string"
+
+        # Check specific conversions
+        assert result[0]["id"] == "2436"
+        assert result[1]["id"] == "2437"
+        assert result[2]["id"] == "2597"
+
+    def test_list_notes_none_id_handling(self, mock_notes_app):
+        """Test handling of None IDs from apple-notes-parser"""
+        # Create a note with None ID
+        mock_note = Mock()
+        mock_note.title = "Note with None ID"
+        mock_note.id = None
+
+        mock_parser = Mock()
+        mock_parser.notes = [mock_note]
+
+        with patch("apple_notes_parser.AppleNotesParser", return_value=mock_parser):
+            result = list_notes(limit=1)
+
+        # Should handle None ID gracefully
+        assert len(result) == 1
+        assert result[0]["title"] == "Note with None ID"
+        assert result[0]["id"] == "unknown"
+        assert isinstance(result[0]["id"], str)
