@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-08-21
+
+### Fixed
+- **Code Cleanup**: Removed unnecessary HTML and temporary files from repository
+- **Version Consistency**: Fixed version synchronization across manifest.json, pyproject.toml, and packaging scripts
+- **Git History**: Cleaned up development artifacts and improved repository organization
+
+### Changed
+- **Repository Structure**: Streamlined codebase by removing unused render utilities and temporary files
+- **Build Process**: Enhanced packaging reliability with consistent version handling
+
+### Technical
+- Maintained all 51 tests passing with zero regressions
+- Improved codebase cleanliness and maintainability
+- Enhanced version management across all project files
+
 ## [0.4.0] - 2025-08-21
 
 ### Changed

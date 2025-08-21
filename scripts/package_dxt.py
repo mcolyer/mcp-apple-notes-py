@@ -119,7 +119,7 @@ def create_dxt_package():
 
     # Get package name and version from manifest
     package_name = manifest.get("name", "apple-notes-mcp")
-    version = manifest.get("version", "0.4.0")
+    version = manifest.get("version", "0.4.1")
     output_filename = f"{package_name}-{version}.dxt"
 
     print(f"📦 Creating bundled DXT package: {output_filename}")
