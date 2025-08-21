@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-08-21
+
+### Changed
+- **Test Suite**: Expanded test suite from 44 to 51 tests with improved coverage
+- **Test Organization**: Enhanced test structure and reliability with better mock patterns
+- **Code Quality**: Maintained comprehensive test coverage across all MCP functions
+
+### Technical
+- All 51 tests continue to pass with comprehensive coverage
+- Enhanced test fixtures and mock configurations for better reliability
+- Improved test patterns for consistent testing across all functions
+
 ## [0.3.0] - 2025-08-05
 
 ### Added
