@@ -86,7 +86,7 @@ class TestListNotes:
         for i, title in enumerate([None, "Valid Note", ""]):
             mock_note = Mock()
             mock_note.title = title
-            mock_note.note_id = f"id{i + 1}"
+            mock_note.applescript_id = f"id{i + 1}"
             mock_notes.append(mock_note)
 
         mock_parser = Mock()
@@ -136,13 +136,13 @@ class TestListNotes:
         # Create mock notes where one will cause an error
         mock_note1 = Mock()
         mock_note1.title = "Good Note"
-        mock_note1.note_id = "id1"
+        mock_note1.applescript_id = "id1"
 
         mock_note2 = Mock()
         mock_note2.title = Mock(
             side_effect=Exception("Note error")
         )  # This will cause an error
-        mock_note2.note_id = "id2"
+        mock_note2.applescript_id = "id2"
 
         mock_parser = Mock()
         mock_parser.notes = [mock_note1, mock_note2]
@@ -159,21 +159,21 @@ class TestListNotes:
         # Create mock notes with folder attributes
         mock_note1 = Mock()
         mock_note1.title = "Work Note"
-        mock_note1.note_id = "id1"
+        mock_note1.applescript_id = "id1"
         mock_note1.folder_name = "Work"
         mock_note1.folder = Mock()
         mock_note1.folder.name = "Work"
 
         mock_note2 = Mock()
         mock_note2.title = "Personal Note"
-        mock_note2.note_id = "id2"
+        mock_note2.applescript_id = "id2"
         mock_note2.folder_name = "Personal"
         mock_note2.folder = Mock()
         mock_note2.folder.name = "Personal"
 
         mock_note3 = Mock()
         mock_note3.title = "Another Work Note"
-        mock_note3.note_id = "id3"
+        mock_note3.applescript_id = "id3"
         mock_note3.folder_name = "Work Projects"
         mock_note3.folder = Mock()
         mock_note3.folder.name = "Work Projects"
@@ -207,12 +207,12 @@ class TestListNotes:
         # Create a note that will cause an error when accessing folder
         mock_note1 = Mock()
         mock_note1.title = "Good Note"
-        mock_note1.note_id = "id1"
+        mock_note1.applescript_id = "id1"
         mock_note1.folder_name = "Work"
 
         mock_note2 = Mock()
         mock_note2.title = "Error Note"
-        mock_note2.note_id = "id2"
+        mock_note2.applescript_id = "id2"
         # This note will cause an error when accessing folder_name
         mock_note2.folder_name = Mock(side_effect=Exception("Folder error"))
         mock_note2.folder = Mock(side_effect=Exception("Folder error"))
@@ -255,7 +255,7 @@ class TestListNotes:
         # Create a note with None ID
         mock_note = Mock()
         mock_note.title = "Note with None ID"
-        mock_note.note_id = None
+        mock_note.applescript_id = None
 
         mock_parser = Mock()
         mock_parser.notes = [mock_note]

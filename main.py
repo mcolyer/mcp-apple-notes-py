@@ -85,7 +85,7 @@ def list_notes(limit: int = 50, folder: str = None) -> list[dict[str, str]]:
         for note in limited_notes:
             try:
                 title = note.title or "Untitled"
-                note_id = str(note.note_id) if note.note_id is not None else "unknown"
+                note_id = str(note.applescript_id) if note.applescript_id is not None else "unknown"
                 note_data.append({"title": title, "id": note_id})
                 logger.debug(f"Added note: {title} (ID: {note_id})")
             except Exception as note_error:
@@ -325,7 +325,7 @@ def search_notes(query: str, limit: int = 10) -> dict[str, Any]:
         for note in limited_notes:
             try:
                 title = note.title or "Untitled"
-                note_id = str(note.note_id) if note.note_id is not None else "unknown"
+                note_id = str(note.applescript_id) if note.applescript_id is not None else "unknown"
                 formatted_notes.append({"title": title, "id": note_id})
             except Exception as note_error:
                 logger.warning(f"Error processing search result note: {note_error}")

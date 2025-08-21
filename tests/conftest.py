@@ -127,7 +127,7 @@ def mock_note_objects():
     ):
         mock_note = Mock()
         mock_note.title = title
-        mock_note.note_id = note_id
+        mock_note.applescript_id = note_id
         mock_note.body = f"<div>This is {title.lower()} content</div>"
         mock_note.plaintext = f"This is {title.lower()} content"
         mock_note.creation_date = datetime(2025, 1, i + 1, 10, 0, 0)
@@ -152,7 +152,7 @@ def mock_note_objects_with_integer_ids():
     ):
         mock_note = Mock()
         mock_note.title = title
-        mock_note.note_id = note_id  # Integer ID like real apple-notes-parser
+        mock_note.applescript_id = note_id  # Integer ID like real apple-notes-parser
         mock_note.body = f"<div>This is {title.lower()} content</div>"
         mock_note.plaintext = f"This is {title.lower()} content"
         mock_note.creation_date = datetime(2025, 1, i + 1, 10, 0, 0)
