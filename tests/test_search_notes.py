@@ -150,11 +150,11 @@ class TestSearchNotes:
         """Test handling of notes with None titles in search results"""
         mock_note1 = Mock()
         mock_note1.title = None
-        mock_note1.id = "id1"
+        mock_note1.note_id = "id1"
 
         mock_note2 = Mock()
         mock_note2.title = "Valid Note"
-        mock_note2.id = "id2"
+        mock_note2.note_id = "id2"
 
         mock_parser = Mock()
         mock_parser.search_notes.return_value = [mock_note1, mock_note2]
@@ -229,7 +229,7 @@ class TestSearchNotes:
         # Create a note with None ID
         mock_note = Mock()
         mock_note.title = "Search result with None ID"
-        mock_note.id = None
+        mock_note.note_id = None
 
         mock_parser = Mock()
         mock_parser.search_notes.return_value = [mock_note]
